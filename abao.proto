@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package abao;
+option go_package="./abao";
+
+message GetAddressRequest {
+  string mnemonic = 1;
+  string password = 2;
+  int64 index = 3;
+  repeated string addressTypes = 4;
+}
+
+message GetAddressResponse {
+  map<string,string> addresses = 1;
+}
+
+message GetBalanceRequest {
+  string address = 1;
+  string addressType = 2;
+  repeated string currencies = 3;
+}
+
+message GetBalanceResponse {
+  map<string,double> balances = 1;
+}
+
+message TransferRequest {
+  string mnemonic = 1;
+  string password = 2;
+  int64 index = 3;
+  string to = 4;
+  int64 value = 5;
+}
+
+message TransferResponse {
+  string TranscationHash = 1;
+}
+
+service Abao {
+  rpc GetAddress(GetAddressRequest) returns(GetAddressResponse);
+  rpc GetBalance(GetBalanceRequest) returns(GetBalanceResponse);
+  rpc Transfer(TransferRequest) returns(TransferResponse);
+}

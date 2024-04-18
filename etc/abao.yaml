@@ -1,0 +1,12 @@
+Mode: dev
+Name: abao.rpc
+ListenOn: 0.0.0.0:8080
+Eth:
+  Nodes:
+    xxxx: 12
+    yyyy: 45
+Tron:
+  Nodes:
+    grpc.trongrid.io:50051: 100
+  ApiKeys:
+    - d9b77ec9-39e0-4765-98d8-2c59188344a0
