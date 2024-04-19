@@ -12,3 +12,16 @@ func NewTronGetBalanceParameter(currency string) TronGetBalanceParameter {
 		currency: currency,
 	}
 }
+
+type TronTransferParameter struct {
+	currency string
+}
+
+// @title	创建转账参数
+// @param	currency	string					地址
+// @return	_			TronTransferParameter	参数
+func NewTronTransferParameter(currency string) TronTransferParameter {
+	return TronTransferParameter{
+		currency: currency,
+	}
+}

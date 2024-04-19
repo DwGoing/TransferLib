@@ -21,7 +21,7 @@ func TestFromMnemonic(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		hdWallet, err := FromMnemonic(test.mnemonic, test.password)
+		hdWallet, err := NewHDWalletFromMnemonic(test.mnemonic, test.password)
 		if err == nil {
 			if ethereumCommon.Bytes2Hex(hdWallet.seed) != test.want {
 				t.Error("Seed Error")
@@ -47,7 +47,7 @@ func TestFromSeed(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		hdWallet, err := FromSeed(test.seed)
+		hdWallet, err := NewHDWalletFromSeed(test.seed)
 		if err == nil {
 			if ethereumCommon.Bytes2Hex(hdWallet.seed) != test.want {
 				t.Error("Seed Error")
@@ -71,7 +71,7 @@ func TestDerivePrivateKey(t *testing.T) {
 		{"m/44'/60'/0'/0/0", "xprvA3apYdt417TRrAdLnuf1pjDXZoXDT8Hdo3YRUTfBTQtLcu5i6yQcxe4FhNP538Yh3iouZqQh6Ar4VsNqiEKhCGx9mpzZdMdtxJhrubQoLHz"},
 	}
 	for _, test := range tests {
-		hdWallet, _ := FromMnemonic(mnemonic, "")
+		hdWallet, _ := NewHDWalletFromMnemonic(mnemonic, "")
 		privateKey, err := hdWallet.DerivePrivateKey(Version_xprv[0], test.path)
 		if err == nil {
 			if privateKey.String() != test.want {
@@ -101,10 +101,10 @@ func TestGetAccount(t *testing.T) {
 		{common.AddressType_BSC, 0, "0xbb03D2098FAa5867FA3381c9b1CB95F45477916E"},
 	}
 	for _, test := range tests {
-		hdWallet, _ := FromMnemonic(mnemonic, "")
+		hdWallet, _ := NewHDWalletFromMnemonic(mnemonic, "")
 		account, err := hdWallet.GetAccount(test.addressType, test.index)
 		if err == nil {
-			address, err := account.GetAddress()
+			address, err := account.GetAddress(test.addressType)
 			if err != nil {
 				t.Error(err.Error())
 			}

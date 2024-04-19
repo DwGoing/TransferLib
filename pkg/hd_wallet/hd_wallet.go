@@ -21,7 +21,7 @@ type HDWallet struct {
 @return _ 				*HDWallet 		钱包实例
 @return _ 				error 			异常信息
 */
-func FromSeed(seed []byte) (*HDWallet, error) {
+func NewHDWalletFromSeed(seed []byte) (*HDWallet, error) {
 	if len(seed) < 16 || len(seed) > 64 {
 		return nil, errors.New("seed invaild")
 	}
@@ -37,7 +37,7 @@ func FromSeed(seed []byte) (*HDWallet, error) {
 @return _ 				*HDWallet 		钱包实例
 @return _ 				error 			异常信息
 */
-func FromMnemonic(mnemonic string, password string) (*HDWallet, error) {
+func NewHDWalletFromMnemonic(mnemonic string, password string) (*HDWallet, error) {
 	if mnemonic == "" {
 		return nil, errors.New("FromMnemonic Error: mnemonic empty")
 	}
@@ -48,12 +48,12 @@ func FromMnemonic(mnemonic string, password string) (*HDWallet, error) {
 	if err != nil {
 		return nil, err
 	}
-	return FromSeed(seed)
+	return NewHDWalletFromSeed(seed)
 }
 
 /*
 @title 	派生子私钥
-@param 	Self   		*HDWallet 				HDWallet实例
+@param 	Self   		*HDWallet
 @param 	version 	[4]byte					私钥ID
 @param 	path 		string					派生路径
 @return _			*hdkeychain.ExtendedKey 子私钥
@@ -83,7 +83,7 @@ func (Self *HDWallet) DerivePrivateKey(version [4]byte, path string) (*hdkeychai
 
 /*
 @title 	获取子钱包
-@param 	Self   		*HDWallet 	HDWallet实例
+@param 	Self   		*HDWallet
 @param 	addressType AddressType 地址类型
 @param 	index 		Currency 	钱包索引
 @return _			*Account	Account实例
@@ -125,9 +125,5 @@ func (Self *HDWallet) GetAccount(addressType common.AddressType, index int64) (*
 	if err != nil {
 		return nil, err
 	}
-	return &Account{
-		Index:       index,
-		AddressType: addressType,
-		PrivateKey:  btcecPrivateKey,
-	}, nil
+	return NewAccountFromPrivateKey(btcecPrivateKey)
 }

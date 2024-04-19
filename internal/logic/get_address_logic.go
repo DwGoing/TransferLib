@@ -26,7 +26,7 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 }
 
 func (l *GetAddressLogic) GetAddress(in *abao.GetAddressRequest) (*abao.GetAddressResponse, error) {
-	hdWallet, err := hd_wallet.FromMnemonic(in.Mnemonic, in.Password)
+	hdWallet, err := hd_wallet.NewHDWalletFromMnemonic(in.Mnemonic, in.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (l *GetAddressLogic) GetAddress(in *abao.GetAddressRequest) (*abao.GetAddre
 		if err != nil {
 			continue
 		}
-		address, err := account.GetAddress()
+		address, err := account.GetAddress(addressType)
 		if err != nil {
 			continue
 		}

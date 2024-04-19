@@ -30,6 +30,11 @@ type TronClient struct {
 	currencies map[string]TronCurrency
 }
 
+// @title	创建Tron客户端
+// @param	nodes		map[string]int			节点列表
+// @param	apiKeys		[]string				ApiKey列表
+// @param	currencies	map[string]TronCurrency	币种列表
+// @return	_			*TronClient				Tron客户端
 func NewTronClient(nodes map[string]int, apiKeys []string, currencies map[string]TronCurrency) *TronClient {
 	return &TronClient{
 		ChainClient: *common.NewChainClient(common.Chain_TRON, nodes),
@@ -103,6 +108,26 @@ func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
 		balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(currency.Decimals))).Float64()
 		return balance, nil
 	}
+}
+
+func (Self *TronClient) Transfer(privateKey string, to string, value float64, args any) error {
+	// parameter, ok := args.(TronGetBalanceParameter)
+	// if !ok {
+	// 	return nil
+	// }
+	// client, err := Self.getTronRpcClient()
+	// if err != nil {
+	// 	return err
+	// }
+	// currency, ok := Self.currencies[parameter.currency]
+	// if !ok {
+	// 	return errors.New("unsupported currency")
+	// }
+	// if currency.Contract == "" {
+	// 	// client.Transfer()
+	// } else {
+	// }
+	return nil
 }
 
 type Tron struct{}
