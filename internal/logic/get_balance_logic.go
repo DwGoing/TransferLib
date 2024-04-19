@@ -2,6 +2,8 @@ package logic
 
 import (
 	"context"
+	"errors"
+	"sync"
 
 	"abao/abao"
 	"abao/internal/svc"
@@ -30,22 +32,26 @@ func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalan
 	if err != nil {
 		return nil, err
 	}
+	waitGroup := sync.WaitGroup{}
 	balances := map[string]float64{}
-	var client common.IChainClient
-	for _, currencyStr := range in.Currencies {
-		var balance float64
-		switch addressType {
-		case common.AddressType_TRON:
-			client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-			balance, err = client.GetBalance(in.Address, tron.NewTronGetBalanceParameter(currencyStr))
-			if err != nil {
-				continue
-			}
-		default:
-			continue
+	switch addressType {
+	case common.AddressType_TRON:
+		client := tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		for _, currency := range in.Currencies {
+			waitGroup.Add(1)
+			go func(c string) {
+				defer waitGroup.Done()
+				balance, err := client.GetBalance(in.Address, tron.NewTronGetBalanceParameter(c))
+				if err != nil {
+					return
+				}
+				balances[c] = balance
+			}(currency)
 		}
-		balances[currencyStr] = balance
+	default:
+		return nil, errors.New("unsupported address type")
 	}
+	waitGroup.Wait()
 
 	return &abao.GetBalanceResponse{
 		Balances: balances,
