@@ -1,6 +1,7 @@
 Mode: dev
 Name: abao.rpc
 ListenOn: 0.0.0.0:8080
+Timeout: 0
 Tron:
   Nodes:
     grpc.nile.trongrid.io:50051: 100
