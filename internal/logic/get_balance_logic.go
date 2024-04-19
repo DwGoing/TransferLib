@@ -6,6 +6,7 @@ import (
 	"abao/abao"
 	"abao/internal/svc"
 	"abao/pkg/common"
+	"abao/pkg/tron"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,18 +33,15 @@ func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalan
 	balances := map[string]float64{}
 	var client common.IChainClient
 	for _, currencyStr := range in.Currencies {
-		currency, err := common.ParseCurrency(currencyStr)
-		if err != nil {
-			continue
-		}
+		var balance float64
 		switch addressType {
 		case common.AddressType_TRON:
-			client = common.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys)
+			client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+			balance, err = client.GetBalance(in.Address, tron.NewTronGetBalanceParameter(currencyStr))
+			if err != nil {
+				continue
+			}
 		default:
-			continue
-		}
-		balance, err := client.GetBalance(in.Address, addressType, currency)
-		if err != nil {
 			continue
 		}
 		balances[currencyStr] = balance

@@ -1,6 +1,7 @@
-package common
+package tron
 
 import (
+	"abao/pkg/common"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/json"
@@ -16,7 +17,7 @@ import (
 	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
-	"github.com/fbsobreira/gotron-sdk/pkg/common"
+	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,29 +25,31 @@ import (
 )
 
 type TronClient struct {
-	ChainClient
-	apiKeys []string
+	common.ChainClient
+	apiKeys    []string
+	currencies map[string]TronCurrency
 }
 
-func NewTronClient(nodes map[string]int, apiKeys []string) *TronClient {
+func NewTronClient(nodes map[string]int, apiKeys []string, currencies map[string]TronCurrency) *TronClient {
 	return &TronClient{
-		ChainClient: *newChainClient(Chain_TRON, nodes),
+		ChainClient: *common.NewChainClient(common.Chain_TRON, nodes),
 		apiKeys:     apiKeys,
+		currencies:  currencies,
 	}
 }
 
 // @title	获取Tron客户端
-// @param	Self	*TronClient			模块实例
+// @param	Self	*TronClient
 // @return	_		*client.GrpcClient	客户端
 // @return	_		error				异常信息
 func (Self *TronClient) getTronRpcClient() (*client.GrpcClient, error) {
 	sum := 0
-	for _, v := range Self.nodes {
+	for _, v := range Self.GetNodes() {
 		sum += v
 	}
 	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
 	var node string
-	for k, v := range Self.nodes {
+	for k, v := range Self.GetNodes() {
 		if v >= i {
 			node = k
 			break
@@ -66,33 +69,39 @@ func (Self *TronClient) getTronRpcClient() (*client.GrpcClient, error) {
 	return client, nil
 }
 
-func (Self *TronClient) GetBalance(address string, addressType AddressType, currency Currency) (float64, error) {
-	switch addressType {
-	case AddressType_TRON:
-		client, err := Self.getTronRpcClient()
+// @title	查询余额
+// @param	Self	*TronClient
+// @param	address	string		地址
+// @param	args	any			参数
+// @return	_		float64		余额
+// @return	_		error		异常信息
+func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
+	parameter, ok := args.(TronGetBalanceParameter)
+	if !ok {
+		return 0, nil
+	}
+	client, err := Self.getTronRpcClient()
+	if err != nil {
+		return 0, err
+	}
+	currency, ok := Self.currencies[parameter.currency]
+	if !ok {
+		return 0, errors.New("unsupported currency")
+	}
+	if currency.Contract == "" {
+		account, err := client.GetAccount(address)
 		if err != nil {
 			return 0, err
 		}
-		switch currency {
-		case Currency_TRX:
-			account, err := client.GetAccount(address)
-			if err != nil {
-				return 0, err
-			}
-			balance, _ := new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(1e6)).Float64()
-			return balance, nil
-		case Currency_USDT:
-			balanceBigInt, err := client.TRC20ContractBalance(address, "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t")
-			if err != nil {
-				return 0, err
-			}
-			balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(1e6)).Float64()
-			return balance, nil
-		default:
-			return 0, errors.New("unsupported currency")
+		balance, _ := new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(1e6)).Float64()
+		return balance, nil
+	} else {
+		balanceBigInt, err := client.TRC20ContractBalance(address, currency.Contract)
+		if err != nil {
+			return 0, err
 		}
-	default:
-		return 0, errors.New("unsupported address type")
+		balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(currency.Decimals))).Float64()
+		return balance, nil
 	}
 }
 
@@ -133,7 +142,7 @@ func (Self *Tron) SendTronTransaction(client *client.GrpcClient, privateKey *ecd
 		if start++; start > 10 {
 			return nil, errors.New("transaction info not found")
 		}
-		transaction, err = client.GetTransactionInfoByID(common.BytesToHexString(hash))
+		transaction, err = client.GetTransactionInfoByID(goTornSdkCommon.BytesToHexString(hash))
 		if err != nil {
 			time.Sleep(time.Second)
 			continue
@@ -151,9 +160,9 @@ func (Self *Tron) SendTronTransaction(client *client.GrpcClient, privateKey *ecd
 // @param	txHash		string				交易Hash
 // @return	_			*Transaction	交易信息
 // @return	_			error				异常信息
-func (Self *Tron) DecodeTronTransaction(client *client.GrpcClient, txHash string) (*Transaction, error) {
-	result := Transaction{
-		Chain: Chain_TRON,
+func (Self *Tron) DecodeTronTransaction(client *client.GrpcClient, txHash string) (*common.Transaction, error) {
+	result := common.Transaction{
+		Chain: common.Chain_TRON,
 		Hash:  txHash,
 	}
 	tx, err := client.GetTransactionInfoByID(txHash)
@@ -180,11 +189,11 @@ func (Self *Tron) DecodeTronTransaction(client *client.GrpcClient, txHash string
 		if err != nil {
 			return nil, err
 		}
-		result.From = common.EncodeCheck(contract.GetOwnerAddress())
-		result.To = common.EncodeCheck(contract.GetToAddress())
+		result.From = goTornSdkCommon.EncodeCheck(contract.GetOwnerAddress())
+		result.To = goTornSdkCommon.EncodeCheck(contract.GetToAddress())
 		result.Amount, _ = new(big.Float).Quo(new(big.Float).SetInt64(contract.GetAmount()), big.NewFloat(1e6)).Float64()
 	} else {
-		contractAddress := common.EncodeCheck(tx.ContractAddress)
+		contractAddress := goTornSdkCommon.EncodeCheck(tx.ContractAddress)
 		result.Contract = &contractAddress
 		var contract core.TriggerSmartContract
 		err = contracts[0].GetParameter().UnmarshalTo(&contract)
@@ -201,11 +210,11 @@ func (Self *Tron) DecodeTronTransaction(client *client.GrpcClient, txHash string
 			return nil, errors.New("not transfer transaction")
 		}
 		// 签名校验
-		if common.BytesToHexString(topics[0]) != common.BytesToHexString(common.Keccak256([]byte("Transfer(address,address,uint256)"))) {
+		if goTornSdkCommon.BytesToHexString(topics[0]) != goTornSdkCommon.BytesToHexString(goTornSdkCommon.Keccak256([]byte("Transfer(address,address,uint256)"))) {
 			return nil, errors.New("not transfer transaction")
 		}
-		result.From = common.EncodeCheck(contract.GetOwnerAddress())
-		result.To = common.EncodeCheck(append([]byte{0x41}, topics[2][12:]...))
+		result.From = goTornSdkCommon.EncodeCheck(contract.GetOwnerAddress())
+		result.To = goTornSdkCommon.EncodeCheck(append([]byte{0x41}, topics[2][12:]...))
 		decimalsBigInt, err := client.TRC20GetDecimals(contractAddress)
 		if err != nil {
 			return nil, err
@@ -224,17 +233,17 @@ func (Self *Tron) DecodeTronTransaction(client *client.GrpcClient, txHash string
 // @param	end			int64					结束高度
 // @return	_			[]model.Transaction		交易信息
 // @return	_			error					异常信息
-func (Self *Tron) GetTronTransactionsFromBlocks(client *client.GrpcClient, start int64, end int64) ([]Transaction, error) {
+func (Self *Tron) GetTronTransactionsFromBlocks(client *client.GrpcClient, start int64, end int64) ([]common.Transaction, error) {
 	blocklist, err := client.GetBlockByLimitNext(start, end)
 	if err != nil {
 		return nil, err
 	}
 	blocks := blocklist.GetBlock()
-	result := []Transaction{}
+	result := []common.Transaction{}
 	for _, block := range blocks {
 		transactions := block.GetTransactions()
 		for _, transaction := range transactions {
-			tx, err := Self.DecodeTronTransaction(client, common.Bytes2Hex(transaction.GetTxid()))
+			tx, err := Self.DecodeTronTransaction(client, goTornSdkCommon.Bytes2Hex(transaction.GetTxid()))
 			if err != nil {
 				continue
 			}
@@ -269,8 +278,8 @@ type GetTronTransactionsByAddressResponse_Trc20Transaction_TokenInfo struct {
 // @param	endTime		time.Time				结束时间
 // @return	_			[]Transaction	交易信息
 // @return	_			error					异常信息
-func (Self *Tron) GetTronTransactionsByAddress(url string, address string, token *string, endTime time.Time) ([]Transaction, error) {
-	var transactions []Transaction
+func (Self *Tron) GetTronTransactionsByAddress(url string, address string, token *string, endTime time.Time) ([]common.Transaction, error) {
+	var transactions []common.Transaction
 	if token == nil {
 		// 未实现
 	} else {
@@ -296,11 +305,11 @@ func (Self *Tron) GetTronTransactionsByAddress(url string, address string, token
 		if err != nil {
 			return nil, err
 		}
-		linq.From(res.Data).SelectT(func(item GetTronTransactionsByAddressResponse_Trc20Transaction) Transaction {
+		linq.From(res.Data).SelectT(func(item GetTronTransactionsByAddressResponse_Trc20Transaction) common.Transaction {
 			amountBitInt, _ := new(big.Int).SetString(item.Value, 10)
 			amount, _ := new(big.Float).Quo(new(big.Float).SetInt(amountBitInt), big.NewFloat(math.Pow10(int(item.TokenInfo.Decimals)))).Float64()
-			return Transaction{
-				Chain:     Chain_TRON,
+			return common.Transaction{
+				Chain:     common.Chain_TRON,
 				Hash:      item.TransactionId,
 				TimeStamp: item.BlockTimestamp,
 				Contract:  &item.TokenInfo.Address,

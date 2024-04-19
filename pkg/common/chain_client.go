@@ -1,7 +1,7 @@
 package common
 
 type IChainClient interface {
-	GetBalance(address string, addressType AddressType, currency Currency) (float64, error)
+	GetBalance(address string, args any) (float64, error)
 }
 
 type ChainClient struct {
@@ -9,9 +9,13 @@ type ChainClient struct {
 	nodes map[string]int
 }
 
-func newChainClient(chain Chain, nodes map[string]int) *ChainClient {
+func NewChainClient(chain Chain, nodes map[string]int) *ChainClient {
 	return &ChainClient{
 		chain: chain,
 		nodes: nodes,
 	}
+}
+
+func (Self *ChainClient) GetNodes() map[string]int {
+	return Self.nodes
 }
