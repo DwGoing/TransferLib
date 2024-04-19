@@ -22,9 +22,9 @@ func NewAbaoServer(svcCtx *svc.ServiceContext) *AbaoServer {
 	}
 }
 
-func (s *AbaoServer) GetAddress(ctx context.Context, in *abao.GetAddressRequest) (*abao.GetAddressResponse, error) {
-	l := logic.NewGetAddressLogic(ctx, s.svcCtx)
-	return l.GetAddress(in)
+func (s *AbaoServer) GetAccount(ctx context.Context, in *abao.GetAccountRequest) (*abao.GetAccountResponse, error) {
+	l := logic.NewGetAccountLogic(ctx, s.svcCtx)
+	return l.GetAccount(in)
 }
 
 func (s *AbaoServer) GetBalance(ctx context.Context, in *abao.GetBalanceRequest) (*abao.GetBalanceResponse, error) {

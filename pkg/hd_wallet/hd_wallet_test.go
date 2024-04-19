@@ -104,7 +104,7 @@ func TestGetAccount(t *testing.T) {
 		hdWallet, _ := NewHDWalletFromMnemonic(mnemonic, "")
 		account, err := hdWallet.GetAccount(test.addressType, test.index)
 		if err == nil {
-			address, err := account.GetAddress(test.addressType)
+			address, err := account.GetAddress()
 			if err != nil {
 				t.Error(err.Error())
 			}

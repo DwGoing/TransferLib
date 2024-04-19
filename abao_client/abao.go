@@ -13,15 +13,16 @@ import (
 )
 
 type (
-	GetAddressRequest  = abao.GetAddressRequest
-	GetAddressResponse = abao.GetAddressResponse
+	Account            = abao.Account
+	GetAccountRequest  = abao.GetAccountRequest
+	GetAccountResponse = abao.GetAccountResponse
 	GetBalanceRequest  = abao.GetBalanceRequest
 	GetBalanceResponse = abao.GetBalanceResponse
 	TransferRequest    = abao.TransferRequest
 	TransferResponse   = abao.TransferResponse
 
 	Abao interface {
-		GetAddress(ctx context.Context, in *GetAddressRequest, opts ...grpc.CallOption) (*GetAddressResponse, error)
+		GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
 		GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 		Transfer(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error)
 	}
@@ -37,9 +38,9 @@ func NewAbao(cli zrpc.Client) Abao {
 	}
 }
 
-func (m *defaultAbao) GetAddress(ctx context.Context, in *GetAddressRequest, opts ...grpc.CallOption) (*GetAddressResponse, error) {
+func (m *defaultAbao) GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error) {
 	client := abao.NewAbaoClient(m.cli.Conn())
-	return client.GetAddress(ctx, in, opts...)
+	return client.GetAccount(ctx, in, opts...)
 }
 
 func (m *defaultAbao) GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error) {

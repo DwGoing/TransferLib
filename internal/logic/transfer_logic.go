@@ -2,9 +2,12 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	"abao/abao"
 	"abao/internal/svc"
+	"abao/pkg/common"
+	"abao/pkg/tron"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -24,7 +27,23 @@ func NewTransferLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Transfer
 }
 
 func (l *TransferLogic) Transfer(in *abao.TransferRequest) (*abao.TransferResponse, error) {
-	// todo: add your logic here and delete this line
+	addressType, err := common.ParseAddressType(in.AddressType)
+	if err != nil {
+		return nil, err
+	}
+	var txHash string
+	switch addressType {
+	case common.AddressType_TRON:
+		client := tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		txHash, err = client.Transfer(in.PrivateKey, in.To, in.Value, tron.NewTronTransferParameter(in.Currency))
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, errors.New("unsupported address type")
+	}
 
-	return &abao.TransferResponse{}, nil
+	return &abao.TransferResponse{
+		TranscationHash: txHash,
+	}, nil
 }

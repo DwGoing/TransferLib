@@ -125,5 +125,5 @@ func (Self *HDWallet) GetAccount(addressType common.AddressType, index int64) (*
 	if err != nil {
 		return nil, err
 	}
-	return NewAccountFromPrivateKey(btcecPrivateKey)
+	return NewAccountFromPrivateKey(addressType, btcecPrivateKey)
 }

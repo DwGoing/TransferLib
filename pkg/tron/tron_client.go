@@ -2,6 +2,7 @@ package tron
 
 import (
 	"abao/pkg/common"
+	"abao/pkg/hd_wallet"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"encoding/json"
@@ -18,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
 	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
+	"github.com/fbsobreira/gotron-sdk/pkg/proto/api"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -98,7 +100,7 @@ func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
 		if err != nil {
 			return 0, err
 		}
-		balance, _ := new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(1e6)).Float64()
+		balance, _ := new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(math.Pow10(currency.Decimals))).Float64()
 		return balance, nil
 	} else {
 		balanceBigInt, err := client.TRC20ContractBalance(address, currency.Contract)
@@ -110,37 +112,14 @@ func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
 	}
 }
 
-func (Self *TronClient) Transfer(privateKey string, to string, value float64, args any) error {
-	// parameter, ok := args.(TronGetBalanceParameter)
-	// if !ok {
-	// 	return nil
-	// }
-	// client, err := Self.getTronRpcClient()
-	// if err != nil {
-	// 	return err
-	// }
-	// currency, ok := Self.currencies[parameter.currency]
-	// if !ok {
-	// 	return errors.New("unsupported currency")
-	// }
-	// if currency.Contract == "" {
-	// 	// client.Transfer()
-	// } else {
-	// }
-	return nil
-}
-
-type Tron struct{}
-
 // @title	发送Tron交易
-// @param	Self		*Tron					模块实例
+// @param	Self		*TronClient
 // @param	client		*client.GrpcClient		客户端
 // @param	privateKey	*ecdsa.PrivateKey		私钥
 // @param	tx			*core.Transaction		交易
-// @param	waitReceipt	*client.GrpcClient		是否等待结果
 // @return	_			*core.TransactionInfo	交易信息
 // @return	_			error					异常信息
-func (Self *Tron) SendTronTransaction(client *client.GrpcClient, privateKey *ecdsa.PrivateKey, tx *core.Transaction, waitReceipt bool) (*core.TransactionInfo, error) {
+func (Self *TronClient) sendTronTransaction(client *client.GrpcClient, privateKey *ecdsa.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
 	rawData, err := proto.Marshal(tx.GetRawData())
 	if err != nil {
 		return nil, err
@@ -179,6 +158,58 @@ func (Self *Tron) SendTronTransaction(client *client.GrpcClient, privateKey *ecd
 	}
 	return transaction, err
 }
+
+// @title	转账
+// @param	Self		*TronClient
+// @param	privateKey	*ecdsa.PrivateKey	私钥
+// @param	to			string				交易
+// @param	value		float64				金额
+// @param	args		any					参数
+// @return	_			string				交易哈希
+// @return	_			error				异常信息
+func (Self *TronClient) Transfer(privateKey string, to string, value float64, args any) (string, error) {
+	parameter, ok := args.(TronTransferParameter)
+	if !ok {
+		return "", nil
+	}
+	client, err := Self.getTronRpcClient()
+	if err != nil {
+		return "", err
+	}
+	currency, ok := Self.currencies[parameter.currency]
+	if !ok {
+		return "", errors.New("unsupported currency")
+	}
+	account, err := hd_wallet.NewAccountFromPrivateKeyHex(common.AddressType_TRON, privateKey)
+	if err != nil {
+		return "", err
+	}
+	from, err := account.GetAddress()
+	var tx *api.TransactionExtention
+	if currency.Contract == "" {
+		if err != nil {
+			return "", err
+		}
+		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currency.Decimals))).Int64()
+		tx, err = client.Transfer(from, to, valueInt64)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currency.Decimals))).Int(new(big.Int))
+		tx, err = client.TRC20Send(from, to, currency.Contract, valueBigInt, 300000000)
+		if err != nil {
+			return "", err
+		}
+	}
+	txInfo, err := Self.sendTronTransaction(client, account.GetPrivateKey().ToECDSA(), tx.Transaction)
+	if err != nil {
+		return "", err
+	}
+	return goTornSdkCommon.Bytes2Hex(txInfo.GetId()), nil
+}
+
+type Tron struct{}
 
 // @title	解析交易
 // @param	Self		*Tron				模块实例

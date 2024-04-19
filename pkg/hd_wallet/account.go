@@ -10,46 +10,69 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/cosmos/btcutil/bech32"
 	"github.com/ethereum/go-ethereum/crypto"
-	tronCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
+	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
 )
 
 type Account struct {
-	privateKey *btcec.PrivateKey
+	addressType common.AddressType
+	privateKey  *btcec.PrivateKey
 }
 
 // @title	创建账户
-// @param	privateKeyHex	string		节点列表
-// @return	_				*Account	账户
-// @return	_				error		异常信息
-func NewAccountFromPrivateKey(privateKey *btcec.PrivateKey) (*Account, error) {
+// @param	addressType	common.AddressType	地址类型
+// @param	privateKey	string				私钥
+// @return	_			*Account			账户
+// @return	_			error				异常信息
+func NewAccountFromPrivateKey(addressType common.AddressType, privateKey *btcec.PrivateKey) (*Account, error) {
 	return &Account{
-		privateKey: privateKey,
+		addressType: addressType,
+		privateKey:  privateKey,
 	}, nil
 }
 
 // @title	创建账户
-// @param	privateKeyHex	string		节点列表
+// @param	addressType	common.AddressType	地址类型
+// @param	privateKeyHex	string		十六进制私钥
 // @return	_				*Account	账户
 // @return	_				error		异常信息
-func NewAccountFromPrivateKeyHex(privateKeyHex string) (*Account, error) {
+func NewAccountFromPrivateKeyHex(addressType common.AddressType, privateKeyHex string) (*Account, error) {
 	bytes, err := hex.DecodeString(privateKeyHex)
 	if err != nil {
 		return nil, err
 	}
 	privateKey, _ := btcec.PrivKeyFromBytes(btcec.S256(), bytes)
-	return NewAccountFromPrivateKey(privateKey)
+	return NewAccountFromPrivateKey(addressType, privateKey)
+}
+
+/*
+@title 	获取私钥
+@param 	Self   		*Account
+@return _ 			*btcec.PrivateKey 	私钥
+@return _ 			error 				异常信息
+*/
+func (Self *Account) GetPrivateKey() *btcec.PrivateKey {
+	return Self.privateKey
+}
+
+/*
+@title 	获取十六进制私钥
+@param 	Self   		*Account
+@return _ 			string 		私钥
+@return _ 			error 		异常信息
+*/
+func (Self *Account) GetPrivateKeyHex() string {
+	return goTornSdkCommon.Bytes2Hex(Self.privateKey.Serialize())
 }
 
 /*
 @title 	获取钱包地址
 @param 	Self   		*Account
-@param 	addressType common.AddressType	地址类型
 @return _ 			string 				地址
 @return _ 			error 				异常信息
 */
-func (Self *Account) GetAddress(addressType common.AddressType) (string, error) {
+func (Self *Account) GetAddress() (string, error) {
 	address := ""
-	switch addressType {
+	switch Self.addressType {
 	case common.AddressType_BTC_LEGACY:
 		bytes := btcutil.Hash160(Self.privateKey.PubKey().SerializeCompressed())
 		address = base58.CheckEncode(bytes, 0x00)
@@ -78,7 +101,7 @@ func (Self *Account) GetAddress(addressType common.AddressType) (string, error) 
 		tronAddress := make([]byte, 0)
 		tronAddress = append(tronAddress, byte(0x41))
 		tronAddress = append(tronAddress, ethAddress.Bytes()...)
-		address = tronCommon.EncodeCheck(tronAddress)
+		address = goTornSdkCommon.EncodeCheck(tronAddress)
 	case common.AddressType_BSC:
 		address = crypto.PubkeyToAddress(Self.privateKey.ToECDSA().PublicKey).Hex()
 	default:

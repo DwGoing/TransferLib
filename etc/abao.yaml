@@ -3,12 +3,12 @@ Name: abao.rpc
 ListenOn: 0.0.0.0:8080
 Tron:
   Nodes:
-    grpc.trongrid.io:50051: 100
+    grpc.nile.trongrid.io:50051: 100
   ApiKeys: [d9b77ec9-39e0-4765-98d8-2c59188344a0]
   Currencies:
     TRX:
       Contract:
       Decimals: 6
     USDT:
-      Contract: TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+      Contract: TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj
       Decimals: 6

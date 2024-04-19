@@ -3,15 +3,20 @@ syntax = "proto3";
 package abao;
 option go_package="./abao";
 
-message GetAddressRequest {
+message GetAccountRequest {
   string mnemonic = 1;
   string password = 2;
   int64 index = 3;
   repeated string addressTypes = 4;
 }
 
-message GetAddressResponse {
-  map<string,string> addresses = 1;
+message GetAccountResponse {
+  map<string,Account> accounts = 1;
+}
+
+message Account {
+  string privateKey = 1;
+  string address = 2;
 }
 
 message GetBalanceRequest {
@@ -25,11 +30,11 @@ message GetBalanceResponse {
 }
 
 message TransferRequest {
-  string mnemonic = 1;
-  string password = 2;
-  int64 index = 3;
+  string addressType = 1;
+  string privateKey = 2;
   string to = 4;
-  int64 value = 5;
+  string currency = 5;
+  double value = 6;
 }
 
 message TransferResponse {
@@ -37,7 +42,7 @@ message TransferResponse {
 }
 
 service Abao {
-  rpc GetAddress(GetAddressRequest) returns(GetAddressResponse);
+  rpc GetAccount(GetAccountRequest) returns(GetAccountResponse);
   rpc GetBalance(GetBalanceRequest) returns(GetBalanceResponse);
   rpc Transfer(TransferRequest) returns(TransferResponse);
 }

@@ -11,26 +11,26 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type GetAddressLogic struct {
+type GetAccountLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAddressLogic {
-	return &GetAddressLogic{
+func NewGetAccountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAccountLogic {
+	return &GetAccountLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-func (l *GetAddressLogic) GetAddress(in *abao.GetAddressRequest) (*abao.GetAddressResponse, error) {
+func (l *GetAccountLogic) GetAccount(in *abao.GetAccountRequest) (*abao.GetAccountResponse, error) {
 	hdWallet, err := hd_wallet.NewHDWalletFromMnemonic(in.Mnemonic, in.Password)
 	if err != nil {
 		return nil, err
 	}
-	addresses := map[string]string{}
+	accounts := map[string]*abao.Account{}
 	for _, addressTypeStr := range in.AddressTypes {
 		addressType, err := common.ParseAddressType(addressTypeStr)
 		if err != nil {
@@ -40,14 +40,17 @@ func (l *GetAddressLogic) GetAddress(in *abao.GetAddressRequest) (*abao.GetAddre
 		if err != nil {
 			continue
 		}
-		address, err := account.GetAddress(addressType)
+		address, err := account.GetAddress()
 		if err != nil {
 			continue
 		}
-		addresses[addressTypeStr] = address
+		accounts[addressTypeStr] = &abao.Account{
+			PrivateKey: account.GetPrivateKeyHex(),
+			Address:    address,
+		}
 	}
 
-	return &abao.GetAddressResponse{
-		Addresses: addresses,
+	return &abao.GetAccountResponse{
+		Accounts: accounts,
 	}, nil
 }
