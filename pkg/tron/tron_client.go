@@ -45,35 +45,20 @@ func NewTronClient(nodes map[string]int, apiKeys []string, currencies map[string
 	}
 }
 
-// @title	获取Tron客户端
-// @param	Self	*TronClient
-// @return	_		*client.GrpcClient	客户端
-// @return	_		error				异常信息
-func (Self *TronClient) getTronRpcClient() (*client.GrpcClient, error) {
-	sum := 0
-	for _, v := range Self.GetNodes() {
-		sum += v
-	}
-	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
-	var node string
-	for k, v := range Self.GetNodes() {
-		if v >= i {
-			node = k
-			break
-		}
-		i = i - v
-	}
-	client := client.NewGrpcClient(node)
-	apiKey := Self.apiKeys[rand.Int()%len(Self.apiKeys)]
-	err := client.SetAPIKey(apiKey)
+// @title	获取当前高度
+// @param	Self		*TronClient
+// @return	_			int64			当前高度
+// @return	_			error			异常信息
+func (Self *TronClient) GetCurrentHeight() (int64, error) {
+	client, err := Self.getTronRpcClient()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	err = client.Start(grpc.WithTransportCredentials(insecure.NewCredentials()))
+	tx, err := client.GetNowBlock()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	return client, nil
+	return tx.BlockHeader.RawData.Number, nil
 }
 
 // @title	查询余额
@@ -110,53 +95,6 @@ func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
 		balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(currency.Decimals))).Float64()
 		return balance, nil
 	}
-}
-
-// @title	发送Tron交易
-// @param	Self		*TronClient
-// @param	client		*client.GrpcClient		客户端
-// @param	privateKey	*ecdsa.PrivateKey		私钥
-// @param	tx			*core.Transaction		交易
-// @return	_			*core.TransactionInfo	交易信息
-// @return	_			error					异常信息
-func (Self *TronClient) sendTronTransaction(client *client.GrpcClient, privateKey *ecdsa.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
-	rawData, err := proto.Marshal(tx.GetRawData())
-	if err != nil {
-		return nil, err
-	}
-	h256h := sha256.New()
-	h256h.Write(rawData)
-	hash := h256h.Sum(nil)
-
-	signature, err := crypto.Sign(hash, privateKey)
-	if err != nil {
-		return nil, err
-	}
-	tx.Signature = append(tx.Signature, signature)
-	result, err := client.Broadcast(tx)
-	if err != nil {
-		return nil, err
-	}
-	if result.Code != 0 {
-		return nil, fmt.Errorf("bad transaction: %v", string(result.GetMessage()))
-	}
-	var transaction *core.TransactionInfo
-	start := 0
-	for {
-		if start++; start > 10 {
-			return nil, errors.New("transaction info not found")
-		}
-		transaction, err = client.GetTransactionInfoByID(goTornSdkCommon.BytesToHexString(hash))
-		if err != nil {
-			time.Sleep(time.Second)
-			continue
-		}
-		if transaction.Result != 0 {
-			return nil, errors.New(string(transaction.ResMessage))
-		}
-		break
-	}
-	return transaction, err
 }
 
 // @title	转账
@@ -207,22 +145,6 @@ func (Self *TronClient) Transfer(privateKey string, to string, value float64, ar
 		return "", err
 	}
 	return goTornSdkCommon.Bytes2Hex(txInfo.GetId()), nil
-}
-
-// @title	获取当前高度
-// @param	Self		*TronClient
-// @return	_			int64			当前高度
-// @return	_			error			异常信息
-func (Self *TronClient) GetCurrentHeight() (int64, error) {
-	client, err := Self.getTronRpcClient()
-	if err != nil {
-		return 0, err
-	}
-	tx, err := client.GetNowBlock()
-	if err != nil {
-		return 0, err
-	}
-	return tx.BlockHeader.RawData.Number, nil
 }
 
 // @title	查询交易
@@ -312,6 +234,84 @@ func (Self *TronClient) GetTransaction(txHash string) (*common.Transaction, erro
 		transaction.Confirms = height - transaction.Height
 	}
 	return &transaction, nil
+}
+
+// @title	获取Tron客户端
+// @param	Self	*TronClient
+// @return	_		*client.GrpcClient	客户端
+// @return	_		error				异常信息
+func (Self *TronClient) getTronRpcClient() (*client.GrpcClient, error) {
+	sum := 0
+	for _, v := range Self.GetNodes() {
+		sum += v
+	}
+	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
+	var node string
+	for k, v := range Self.GetNodes() {
+		if v >= i {
+			node = k
+			break
+		}
+		i = i - v
+	}
+	client := client.NewGrpcClient(node)
+	apiKey := Self.apiKeys[rand.Int()%len(Self.apiKeys)]
+	err := client.SetAPIKey(apiKey)
+	if err != nil {
+		return nil, err
+	}
+	err = client.Start(grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// @title	发送Tron交易
+// @param	Self		*TronClient
+// @param	client		*client.GrpcClient		客户端
+// @param	privateKey	*ecdsa.PrivateKey		私钥
+// @param	tx			*core.Transaction		交易
+// @return	_			*core.TransactionInfo	交易信息
+// @return	_			error					异常信息
+func (Self *TronClient) sendTronTransaction(client *client.GrpcClient, privateKey *ecdsa.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
+	rawData, err := proto.Marshal(tx.GetRawData())
+	if err != nil {
+		return nil, err
+	}
+	h256h := sha256.New()
+	h256h.Write(rawData)
+	hash := h256h.Sum(nil)
+
+	signature, err := crypto.Sign(hash, privateKey)
+	if err != nil {
+		return nil, err
+	}
+	tx.Signature = append(tx.Signature, signature)
+	result, err := client.Broadcast(tx)
+	if err != nil {
+		return nil, err
+	}
+	if result.Code != 0 {
+		return nil, fmt.Errorf("bad transaction: %v", string(result.GetMessage()))
+	}
+	var transaction *core.TransactionInfo
+	start := 0
+	for {
+		if start++; start > 10 {
+			return nil, errors.New("transaction info not found")
+		}
+		transaction, err = client.GetTransactionInfoByID(goTornSdkCommon.BytesToHexString(hash))
+		if err != nil {
+			time.Sleep(time.Second)
+			continue
+		}
+		if transaction.Result != 0 {
+			return nil, errors.New(string(transaction.ResMessage))
+		}
+		break
+	}
+	return transaction, err
 }
 
 // @title	从块中获取交易

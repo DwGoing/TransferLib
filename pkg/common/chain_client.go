@@ -1,9 +1,10 @@
 package common
 
 type IChainClient interface {
+	GetCurrentHeight()
 	GetBalance(address string, args any) (float64, error)
 	Transfer(privateKey string, to string, value float64, args any) (float64, error)
-	GetCurrentHeight()
+	GetTransaction(txHash string) (*Transaction, error)
 }
 
 type ChainClient struct {
