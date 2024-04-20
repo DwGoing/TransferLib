@@ -13,18 +13,21 @@ import (
 )
 
 type (
-	Account            = abao.Account
-	GetAccountRequest  = abao.GetAccountRequest
-	GetAccountResponse = abao.GetAccountResponse
-	GetBalanceRequest  = abao.GetBalanceRequest
-	GetBalanceResponse = abao.GetBalanceResponse
-	TransferRequest    = abao.TransferRequest
-	TransferResponse   = abao.TransferResponse
+	Account                = abao.Account
+	GetAccountRequest      = abao.GetAccountRequest
+	GetAccountResponse     = abao.GetAccountResponse
+	GetBalanceRequest      = abao.GetBalanceRequest
+	GetBalanceResponse     = abao.GetBalanceResponse
+	GetTranscationRequest  = abao.GetTranscationRequest
+	GetTranscationResponse = abao.GetTranscationResponse
+	TransferRequest        = abao.TransferRequest
+	TransferResponse       = abao.TransferResponse
 
 	Abao interface {
 		GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
 		GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 		Transfer(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error)
+		GetTranscation(ctx context.Context, in *GetTranscationRequest, opts ...grpc.CallOption) (*GetTranscationResponse, error)
 	}
 
 	defaultAbao struct {
@@ -51,4 +54,9 @@ func (m *defaultAbao) GetBalance(ctx context.Context, in *GetBalanceRequest, opt
 func (m *defaultAbao) Transfer(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error) {
 	client := abao.NewAbaoClient(m.cli.Conn())
 	return client.Transfer(ctx, in, opts...)
+}
+
+func (m *defaultAbao) GetTranscation(ctx context.Context, in *GetTranscationRequest, opts ...grpc.CallOption) (*GetTranscationResponse, error) {
+	client := abao.NewAbaoClient(m.cli.Conn())
+	return client.GetTranscation(ctx, in, opts...)
 }

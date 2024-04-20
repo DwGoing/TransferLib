@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Abao_GetAccount_FullMethodName = "/abao.Abao/GetAccount"
-	Abao_GetBalance_FullMethodName = "/abao.Abao/GetBalance"
-	Abao_Transfer_FullMethodName   = "/abao.Abao/Transfer"
+	Abao_GetAccount_FullMethodName     = "/abao.Abao/GetAccount"
+	Abao_GetBalance_FullMethodName     = "/abao.Abao/GetBalance"
+	Abao_Transfer_FullMethodName       = "/abao.Abao/Transfer"
+	Abao_GetTranscation_FullMethodName = "/abao.Abao/GetTranscation"
 )
 
 // AbaoClient is the client API for Abao service.
@@ -31,6 +32,7 @@ type AbaoClient interface {
 	GetAccount(ctx context.Context, in *GetAccountRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
 	GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 	Transfer(ctx context.Context, in *TransferRequest, opts ...grpc.CallOption) (*TransferResponse, error)
+	GetTranscation(ctx context.Context, in *GetTranscationRequest, opts ...grpc.CallOption) (*GetTranscationResponse, error)
 }
 
 type abaoClient struct {
@@ -68,6 +70,15 @@ func (c *abaoClient) Transfer(ctx context.Context, in *TransferRequest, opts ...
 	return out, nil
 }
 
+func (c *abaoClient) GetTranscation(ctx context.Context, in *GetTranscationRequest, opts ...grpc.CallOption) (*GetTranscationResponse, error) {
+	out := new(GetTranscationResponse)
+	err := c.cc.Invoke(ctx, Abao_GetTranscation_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AbaoServer is the server API for Abao service.
 // All implementations must embed UnimplementedAbaoServer
 // for forward compatibility
@@ -75,6 +86,7 @@ type AbaoServer interface {
 	GetAccount(context.Context, *GetAccountRequest) (*GetAccountResponse, error)
 	GetBalance(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error)
 	Transfer(context.Context, *TransferRequest) (*TransferResponse, error)
+	GetTranscation(context.Context, *GetTranscationRequest) (*GetTranscationResponse, error)
 	mustEmbedUnimplementedAbaoServer()
 }
 
@@ -90,6 +102,9 @@ func (UnimplementedAbaoServer) GetBalance(context.Context, *GetBalanceRequest) (
 }
 func (UnimplementedAbaoServer) Transfer(context.Context, *TransferRequest) (*TransferResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Transfer not implemented")
+}
+func (UnimplementedAbaoServer) GetTranscation(context.Context, *GetTranscationRequest) (*GetTranscationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTranscation not implemented")
 }
 func (UnimplementedAbaoServer) mustEmbedUnimplementedAbaoServer() {}
 
@@ -158,6 +173,24 @@ func _Abao_Transfer_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Abao_GetTranscation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTranscationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AbaoServer).GetTranscation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Abao_GetTranscation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AbaoServer).GetTranscation(ctx, req.(*GetTranscationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Abao_ServiceDesc is the grpc.ServiceDesc for Abao service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -176,6 +209,10 @@ var Abao_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Transfer",
 			Handler:    _Abao_Transfer_Handler,
+		},
+		{
+			MethodName: "GetTranscation",
+			Handler:    _Abao_GetTranscation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

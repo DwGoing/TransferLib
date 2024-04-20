@@ -41,8 +41,25 @@ message TransferResponse {
   string TranscationHash = 1;
 }
 
+message GetTranscationRequest {
+  string Chain = 1;
+  string TranscationHash = 2;
+}
+
+message GetTranscationResponse {
+  bool Result = 1;
+  int64 Height = 2;
+  int64 Timestamp = 3;
+  string Currency = 4;
+	string From = 5;      
+	string To = 6;        
+	double Value = 7;    
+  int64 Confirms = 8;
+}
+
 service Abao {
   rpc GetAccount(GetAccountRequest) returns(GetAccountResponse);
   rpc GetBalance(GetBalanceRequest) returns(GetBalanceResponse);
   rpc Transfer(TransferRequest) returns(TransferResponse);
+  rpc GetTranscation(GetTranscationRequest) returns(GetTranscationResponse);
 }

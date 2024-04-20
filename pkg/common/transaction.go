@@ -5,9 +5,10 @@ type Transaction struct {
 	Hash      string
 	Height    int64
 	TimeStamp int64
-	Contract  *string
+	Currency  string
 	From      string
 	To        string
-	Amount    float64
+	Value     float64
+	Confirms  int64
 	Result    bool
 }

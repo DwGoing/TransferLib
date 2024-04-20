@@ -36,3 +36,8 @@ func (s *AbaoServer) Transfer(ctx context.Context, in *abao.TransferRequest) (*a
 	l := logic.NewTransferLogic(ctx, s.svcCtx)
 	return l.Transfer(in)
 }
+
+func (s *AbaoServer) GetTranscation(ctx context.Context, in *abao.GetTranscationRequest) (*abao.GetTranscationResponse, error) {
+	l := logic.NewGetTranscationLogic(ctx, s.svcCtx)
+	return l.GetTranscation(in)
+}
