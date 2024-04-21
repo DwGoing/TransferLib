@@ -7,6 +7,7 @@ import (
 	"abao/abao"
 	"abao/internal/svc"
 	"abao/pkg/common"
+	"abao/pkg/eth"
 	"abao/pkg/tron"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,18 +32,18 @@ func (l *GetTranscationLogic) GetTranscation(in *abao.GetTranscationRequest) (*a
 	if err != nil {
 		return nil, err
 	}
-	var transcation *common.Transaction
+	var client common.IChainClient
 	switch chain {
 	case common.Chain_TRON:
-		client := tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-		tx, err := client.GetTransaction(in.TranscationHash)
-		if err != nil {
-			return nil, err
-		}
-		tx.Chain = common.Chain_TRON
-		transcation = tx
+		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+	case common.Chain_ETH:
+		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 	default:
 		return nil, errors.New("unsupported chain")
+	}
+	transcation, err := client.GetTransaction(in.TranscationHash)
+	if err != nil {
+		return nil, err
 	}
 
 	return &abao.GetTranscationResponse{

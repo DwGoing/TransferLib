@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	goEthereumCommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -167,7 +168,76 @@ func (Self *EthClient) Transfer(privateKey string, to string, currency string, v
 // @return	_			*Transaction	交易信息
 // @return	_			error			异常信息
 func (Self *EthClient) GetTransaction(txHash string) (*common.Transaction, error) {
-	return nil, nil
+	transaction := common.Transaction{
+		Chain: common.Chain_ETH,
+		Hash:  txHash,
+	}
+	client, err := Self.GetEthClient()
+	if err != nil {
+		return nil, err
+	}
+	receipt, err := client.TransactionReceipt(context.Background(), goEthereumCommon.HexToHash(txHash))
+	if err != nil {
+		return nil, err
+	}
+	transaction.Result = receipt.Status == 1
+	transaction.Height = receipt.BlockNumber.Int64()
+	tx, isPending, err := client.TransactionByHash(context.Background(), goEthereumCommon.HexToHash(txHash))
+	if err != nil {
+		return nil, err
+	}
+	block, err := client.BlockByNumber(context.Background(), receipt.BlockNumber)
+	if err != nil {
+		return nil, err
+	}
+	transaction.TimeStamp = int64(block.Time())
+	var currency string
+	var currencyInfo EthCurrency
+	var from string
+	var to string
+	var valueBigInt *big.Int
+	if receipt.Logs == nil || len(receipt.Logs) == 0 {
+		fromAddress, err := types.Sender(types.NewEIP155Signer(tx.ChainId()), tx)
+		if err != nil {
+			return nil, err
+		}
+		from = fromAddress.Hex()
+		to = tx.To().Hex()
+		currency = "ETH"
+		valueBigInt = tx.Value()
+	} else {
+		matchCurrency := linq.From(Self.currencies).FirstWithT(func(item linq.KeyValue) bool {
+			return goEthereumCommon.HexToAddress(item.Value.(EthCurrency).Contract) == *tx.To()
+		})
+		currency = matchCurrency.(linq.KeyValue).Key.(string)
+		currencyInfo = matchCurrency.(linq.KeyValue).Value.(EthCurrency)
+		erc20, err := NewErc20(goEthereumCommon.HexToAddress(currencyInfo.Contract), client)
+		if err != nil {
+			return nil, err
+		}
+		for _, log := range receipt.Logs {
+			filterer, err := erc20.ParseTransfer(*log)
+			if err != nil {
+				continue
+			}
+			from = filterer.From.Hex()
+			to = filterer.To.Hex()
+			valueBigInt = filterer.Value
+			break
+		}
+	}
+	transaction.Currency = currency
+	transaction.From = from
+	transaction.To = to
+	transaction.Value, _ = new(big.Float).Quo(new(big.Float).SetInt(valueBigInt), big.NewFloat(math.Pow10(Self.currencies[currency].Decimals))).Float64()
+	if !isPending && transaction.Result {
+		height, err := Self.GetCurrentHeight()
+		if err != nil {
+			return nil, err
+		}
+		transaction.Confirms = height - transaction.Height
+	}
+	return &transaction, nil
 }
 
 // @title	获取Eth客户端
