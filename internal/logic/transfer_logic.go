@@ -7,6 +7,7 @@ import (
 	"abao/abao"
 	"abao/internal/svc"
 	"abao/pkg/common"
+	"abao/pkg/eth"
 	"abao/pkg/tron"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -38,6 +39,9 @@ func (l *TransferLogic) Transfer(in *abao.TransferRequest) (*abao.TransferRespon
 	case common.AddressType_TRON:
 		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
 		args = tron.NewTronTransferParameter()
+	case common.AddressType_ETH:
+		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+		args = eth.NewEthTransferParameter()
 	default:
 		return nil, errors.New("unsupported address type")
 	}

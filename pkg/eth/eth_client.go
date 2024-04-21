@@ -2,6 +2,7 @@ package eth
 
 import (
 	"abao/pkg/common"
+	"abao/pkg/hd_wallet"
 	"context"
 	"errors"
 	"math"
@@ -9,7 +10,10 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	goEthereumCommon "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -53,13 +57,17 @@ func (Self *EthClient) GetCurrentHeight() (int64, error) {
 // @return	_			float64		余额
 // @return	_			error		异常信息
 func (Self *EthClient) GetBalance(address string, currency string, args any) (float64, error) {
-	client, err := Self.GetEthClient()
-	if err != nil {
-		return 0, err
-	}
 	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
 		return 0, errors.New("unsupported currency")
+	}
+	_, ok = args.(EthGetBalanceParameter)
+	if !ok {
+		return 0, nil
+	}
+	client, err := Self.GetEthClient()
+	if err != nil {
+		return 0, err
 	}
 	var balanceBigInt *big.Int
 	if currencyInfo.Contract == "" {
@@ -91,7 +99,66 @@ func (Self *EthClient) GetBalance(address string, currency string, args any) (fl
 // @return	_			string				交易哈希
 // @return	_			error				异常信息
 func (Self *EthClient) Transfer(privateKey string, to string, currency string, value float64, args any) (string, error) {
-	return "", nil
+	account, err := hd_wallet.NewAccountFromPrivateKeyHex(common.AddressType_ETH, privateKey)
+	if err != nil {
+		return "", err
+	}
+	currencyInfo, ok := Self.currencies[currency]
+	if !ok {
+		return "", errors.New("unsupported currency")
+	}
+	_, ok = args.(EthTransferParameter)
+	if !ok {
+		return "", nil
+	}
+	account.GetPrivateKey().ToECDSA()
+	client, err := Self.GetEthClient()
+	if err != nil {
+		return "", err
+	}
+	var signedTx *types.Transaction
+	chainId, err := client.ChainID(context.Background())
+	if err != nil {
+		return "", err
+	}
+	nonce, err := client.PendingNonceAt(context.Background(), crypto.PubkeyToAddress(account.GetPrivateKey().ToECDSA().PublicKey))
+	if err != nil {
+		return "", err
+	}
+	gasPrice, err := client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return "", err
+	}
+	valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int(new(big.Int))
+	if currencyInfo.Contract == "" {
+		tx := types.NewTransaction(nonce, goEthereumCommon.HexToAddress(to), valueBigInt, 21000, gasPrice, nil)
+		signedTx, err = types.SignTx(tx, types.LatestSignerForChainID(chainId), account.GetPrivateKey().ToECDSA())
+		if err != nil {
+			return "", err
+		}
+	} else {
+		ierc20, err := NewErc20(goEthereumCommon.HexToAddress(currencyInfo.Contract), client)
+		if err != nil {
+			return "", err
+		}
+		transactOpts, err := bind.NewKeyedTransactorWithChainID(account.GetPrivateKey().ToECDSA(), chainId)
+		if err != nil {
+			return "", err
+		}
+		transactOpts.NoSend = true
+		transactOpts.Nonce = big.NewInt(int64(nonce))
+		transactOpts.GasLimit = uint64(300000)
+		transactOpts.GasPrice = gasPrice
+		signedTx, err = ierc20.Transfer(transactOpts, goEthereumCommon.HexToAddress(to), valueBigInt)
+		if err != nil {
+			return "", err
+		}
+	}
+	err = client.SendTransaction(context.Background(), signedTx)
+	if err != nil {
+		return "", err
+	}
+	return signedTx.Hash().Hex(), nil
 }
 
 // @title	查询交易
