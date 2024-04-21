@@ -69,17 +69,17 @@ func (Self *TronClient) GetCurrentHeight() (int64, error) {
 // @return	_			float64		余额
 // @return	_			error		异常信息
 func (Self *TronClient) GetBalance(address string, currency string, args any) (float64, error) {
-	_, ok := args.(TronGetBalanceParameter)
+	currencyInfo, ok := Self.currencies[currency]
+	if !ok {
+		return 0, errors.New("unsupported currency")
+	}
+	_, ok = args.(TronGetBalanceParameter)
 	if !ok {
 		return 0, nil
 	}
 	client, err := Self.getTronRpcClient()
 	if err != nil {
 		return 0, err
-	}
-	currencyInfo, ok := Self.currencies[currency]
-	if !ok {
-		return 0, errors.New("unsupported currency")
 	}
 	var balance float64
 	if currencyInfo.Contract == "" {
@@ -108,11 +108,11 @@ func (Self *TronClient) GetBalance(address string, currency string, args any) (f
 // @return	_			string				交易哈希
 // @return	_			error				异常信息
 func (Self *TronClient) Transfer(privateKey string, to string, currency string, value float64, args any) (string, error) {
-	_, ok := args.(TronTransferParameter)
-	if !ok {
-		return "", nil
+	account, err := hd_wallet.NewAccountFromPrivateKeyHex(common.AddressType_TRON, privateKey)
+	if err != nil {
+		return "", err
 	}
-	client, err := Self.getTronRpcClient()
+	from, err := account.GetAddress()
 	if err != nil {
 		return "", err
 	}
@@ -120,16 +120,16 @@ func (Self *TronClient) Transfer(privateKey string, to string, currency string, 
 	if !ok {
 		return "", errors.New("unsupported currency")
 	}
-	account, err := hd_wallet.NewAccountFromPrivateKeyHex(common.AddressType_TRON, privateKey)
+	_, ok = args.(TronTransferParameter)
+	if !ok {
+		return "", nil
+	}
+	client, err := Self.getTronRpcClient()
 	if err != nil {
 		return "", err
 	}
-	from, err := account.GetAddress()
 	var tx *api.TransactionExtention
 	if currencyInfo.Contract == "" {
-		if err != nil {
-			return "", err
-		}
 		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int64()
 		tx, err = client.Transfer(from, to, valueInt64)
 		if err != nil {
