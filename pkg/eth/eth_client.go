@@ -36,9 +36,9 @@ func NewEthClient(nodes map[string]int, currencies map[string]EthCurrency) *EthC
 
 // @title	获取当前高度
 // @param	Self		*EthClient
-// @return	_			int64			当前高度
+// @return	_			uint64			当前高度
 // @return	_			error			异常信息
-func (Self *EthClient) GetCurrentHeight() (int64, error) {
+func (Self *EthClient) GetCurrentHeight() (uint64, error) {
 	client, err := Self.GetEthClient()
 	if err != nil {
 		return 0, err
@@ -47,7 +47,7 @@ func (Self *EthClient) GetCurrentHeight() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int64(height), nil
+	return height, nil
 }
 
 // @title	查询余额
@@ -181,7 +181,7 @@ func (Self *EthClient) GetTransaction(txHash string) (*common.Transaction, error
 		return nil, err
 	}
 	transaction.Result = receipt.Status == 1
-	transaction.Height = receipt.BlockNumber.Int64()
+	transaction.Height = receipt.BlockNumber.Uint64()
 	tx, isPending, err := client.TransactionByHash(context.Background(), goEthereumCommon.HexToHash(txHash))
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func (Self *EthClient) GetTransaction(txHash string) (*common.Transaction, error
 	if err != nil {
 		return nil, err
 	}
-	transaction.TimeStamp = int64(block.Time())
+	transaction.TimeStamp = block.Time()
 	var currency string
 	var currencyInfo EthCurrency
 	var from string

@@ -5,17 +5,13 @@ import (
 	"abao/pkg/hd_wallet"
 	"crypto/ecdsa"
 	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"math"
 	"math/big"
 	"math/rand"
-	"net/http"
 	"time"
 
-	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
 	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
@@ -47,9 +43,9 @@ func NewTronClient(nodes map[string]int, apiKeys []string, currencies map[string
 
 // @title	获取当前高度
 // @param	Self		*TronClient
-// @return	_			int64			当前高度
+// @return	_			uint64			当前高度
 // @return	_			error			异常信息
-func (Self *TronClient) GetCurrentHeight() (int64, error) {
+func (Self *TronClient) GetCurrentHeight() (uint64, error) {
 	client, err := Self.getTronRpcClient()
 	if err != nil {
 		return 0, err
@@ -58,7 +54,7 @@ func (Self *TronClient) GetCurrentHeight() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return tx.BlockHeader.RawData.Number, nil
+	return uint64(tx.BlockHeader.RawData.Number), nil
 }
 
 // @title	查询余额
@@ -167,8 +163,8 @@ func (Self *TronClient) GetTransaction(txHash string) (*common.Transaction, erro
 	if err != nil {
 		return nil, err
 	}
-	transaction.Height = tx.BlockNumber
-	transaction.TimeStamp = tx.GetBlockTimeStamp()
+	transaction.Height = uint64(tx.BlockNumber)
+	transaction.TimeStamp = uint64(tx.GetBlockTimeStamp())
 	coreTx, err := client.GetTransactionByID(txHash)
 	if err != nil {
 		return nil, err
@@ -315,100 +311,4 @@ func (Self *TronClient) sendTronTransaction(client *client.GrpcClient, privateKe
 		break
 	}
 	return transaction, err
-}
-
-// @title	从块中获取交易
-// @param	Self		*Tron					模块实例
-// @param	client		*client.GrpcClient		客户端
-// @param	start		int64					开始高度
-// @param	end			int64					结束高度
-// @return	_			[]model.Transaction		交易信息
-// @return	_			error					异常信息
-func (Self *TronClient) GetTronTransactionsFromBlocks(client *client.GrpcClient, start int64, end int64) ([]common.Transaction, error) {
-	blocklist, err := client.GetBlockByLimitNext(start, end)
-	if err != nil {
-		return nil, err
-	}
-	blocks := blocklist.GetBlock()
-	result := []common.Transaction{}
-	for _, block := range blocks {
-		transactions := block.GetTransactions()
-		for _, transaction := range transactions {
-			tx, err := Self.GetTransaction(goTornSdkCommon.Bytes2Hex(transaction.GetTxid()))
-			if err != nil {
-				continue
-			}
-			result = append(result, *tx)
-		}
-	}
-	return result, nil
-}
-
-type GetTronTransactionsByAddressResponse struct {
-	Data []GetTronTransactionsByAddressResponse_Trc20Transaction `json:"data"`
-}
-
-type GetTronTransactionsByAddressResponse_Trc20Transaction struct {
-	TransactionId  string                                                          `json:"transaction_id"`
-	BlockTimestamp int64                                                           `json:"block_timestamp"`
-	From           string                                                          `json:"from"`
-	To             string                                                          `json:"to"`
-	Value          string                                                          `json:"value"`
-	TokenInfo      GetTronTransactionsByAddressResponse_Trc20Transaction_TokenInfo `json:"token_info"`
-}
-
-type GetTronTransactionsByAddressResponse_Trc20Transaction_TokenInfo struct {
-	Address  string `json:"address"`
-	Decimals int64  `json:"decimals"`
-}
-
-// @title	根据地址获取交易
-// @param	Self		*Tron					模块实例
-// @param	address		string					地址
-// @param	token		*string					币种
-// @param	endTime		time.Time				结束时间
-// @return	_			[]Transaction	交易信息
-// @return	_			error					异常信息
-func (Self *TronClient) GetTronTransactionsByAddress(url string, address string, token *string, endTime time.Time) ([]common.Transaction, error) {
-	var transactions []common.Transaction
-	if token == nil {
-		// 未实现
-	} else {
-		url := fmt.Sprintf("%s/v1/accounts/%s/transactions/trc20?only_confirmed=true&contract_address=%s&min_timestamp=%d",
-			url, address, *token, endTime.UnixMilli(),
-		)
-		request, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			return nil, err
-		}
-		request.Header.Add("accept", "application/json")
-		response, err := http.DefaultClient.Do(request)
-		if err != nil {
-			return nil, err
-		}
-		defer response.Body.Close()
-		body, err := io.ReadAll(response.Body)
-		if err != nil {
-			return nil, err
-		}
-		var res GetTronTransactionsByAddressResponse
-		err = json.Unmarshal(body, &res)
-		if err != nil {
-			return nil, err
-		}
-		linq.From(res.Data).SelectT(func(item GetTronTransactionsByAddressResponse_Trc20Transaction) common.Transaction {
-			amountBitInt, _ := new(big.Int).SetString(item.Value, 10)
-			value, _ := new(big.Float).Quo(new(big.Float).SetInt(amountBitInt), big.NewFloat(math.Pow10(int(item.TokenInfo.Decimals)))).Float64()
-			return common.Transaction{
-				Hash:      item.TransactionId,
-				TimeStamp: item.BlockTimestamp,
-				// Contract:  &item.TokenInfo.Address,
-				From:   item.From,
-				To:     item.To,
-				Value:  value,
-				Result: true,
-			}
-		}).ToSlice(&transactions)
-	}
-	return transactions, nil
 }

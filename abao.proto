@@ -48,13 +48,13 @@ message GetTranscationRequest {
 
 message GetTranscationResponse {
   bool Result = 1;
-  int64 Height = 2;
-  int64 Timestamp = 3;
+  uint64 Height = 2;
+  uint64 Timestamp = 3;
   string Currency = 4;
 	string From = 5;      
 	string To = 6;        
 	double Value = 7;    
-  int64 Confirms = 8;
+  uint64 Confirms = 8;
 }
 
 service Abao {
