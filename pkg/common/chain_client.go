@@ -1,9 +1,9 @@
 package common
 
 type IChainClient interface {
-	GetCurrentHeight()
-	GetBalance(address string, args any) (float64, error)
-	Transfer(privateKey string, to string, value float64, args any) (float64, error)
+	GetCurrentHeight() (int64, error)
+	GetBalance(address string, currency string, args any) (float64, error)
+	Transfer(privateKey string, to string, currency string, value float64, args any) (string, error)
 	GetTransaction(txHash string) (*Transaction, error)
 }
 

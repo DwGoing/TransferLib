@@ -8,6 +8,7 @@ import (
 	"abao/abao"
 	"abao/internal/svc"
 	"abao/pkg/common"
+	"abao/pkg/eth"
 	"abao/pkg/tron"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -34,22 +35,31 @@ func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalan
 	}
 	waitGroup := sync.WaitGroup{}
 	balances := map[string]float64{}
+	var balancesLock sync.Mutex
+	var client common.IChainClient
+	var args any
 	switch addressType {
 	case common.AddressType_TRON:
-		client := tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-		for _, currency := range in.Currencies {
-			waitGroup.Add(1)
-			go func(c string) {
-				defer waitGroup.Done()
-				balance, err := client.GetBalance(in.Address, tron.NewTronGetBalanceParameter(c))
-				if err != nil {
-					return
-				}
-				balances[c] = balance
-			}(currency)
-		}
+		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		args = tron.NewTronGetBalanceParameter()
+	case common.AddressType_ETH:
+		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+		args = eth.NewEthGetBalanceParameter()
 	default:
 		return nil, errors.New("unsupported address type")
+	}
+	for _, currency := range in.Currencies {
+		waitGroup.Add(1)
+		go func(c string) {
+			defer waitGroup.Done()
+			balance, err := client.GetBalance(in.Address, c, args)
+			if err != nil {
+				return
+			}
+			balancesLock.Lock()
+			balances[c] = balance
+			balancesLock.Unlock()
+		}(currency)
 	}
 	waitGroup.Wait()
 

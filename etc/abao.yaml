@@ -13,3 +13,13 @@ Tron:
     USDT:
       Contract: TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj
       Decimals: 6
+Eth:
+  Nodes:
+    https://ethereum-holesky-rpc.publicnode.com: 100
+  Currencies:
+    ETH:
+      Contract:
+      Decimals: 18
+    USDT:
+      Contract: 4555Ed1F6D9cb6CC1D52BB88C7525b17a06da0Dd
+      Decimals: 18

@@ -32,15 +32,18 @@ func (l *TransferLogic) Transfer(in *abao.TransferRequest) (*abao.TransferRespon
 		return nil, err
 	}
 	var txHash string
+	var client common.IChainClient
+	var args any
 	switch addressType {
 	case common.AddressType_TRON:
-		client := tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-		txHash, err = client.Transfer(in.PrivateKey, in.To, in.Value, tron.NewTronTransferParameter(in.Currency))
-		if err != nil {
-			return nil, err
-		}
+		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		args = tron.NewTronTransferParameter()
 	default:
 		return nil, errors.New("unsupported address type")
+	}
+	txHash, err = client.Transfer(in.PrivateKey, in.To, in.Currency, in.Value, args)
+	if err != nil {
+		return nil, err
 	}
 
 	return &abao.TransferResponse{
