@@ -1,4 +1,6 @@
 Mode: dev
+Log:
+  Encoding: plain
 Name: abao.rpc
 ListenOn: 0.0.0.0:8080
 Timeout: 0
