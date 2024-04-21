@@ -7,6 +7,7 @@ import (
 
 	"abao/abao"
 	"abao/internal/svc"
+	"abao/pkg/bsc"
 	"abao/pkg/common"
 	"abao/pkg/eth"
 	"abao/pkg/tron"
@@ -45,6 +46,9 @@ func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalan
 	case common.AddressType_ETH:
 		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 		args = eth.NewEthGetBalanceParameter()
+	case common.AddressType_BSC:
+		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
+		args = bsc.NewBscGetBalanceParameter()
 	default:
 		return nil, errors.New("unsupported address type")
 	}

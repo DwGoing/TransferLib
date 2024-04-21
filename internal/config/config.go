@@ -1,6 +1,7 @@
 package config
 
 import (
+	"abao/pkg/bsc"
 	"abao/pkg/eth"
 	"abao/pkg/tron"
 
@@ -11,6 +12,7 @@ type Config struct {
 	zrpc.RpcServerConf
 	Tron TronConf
 	Eth  EthConf
+	Bsc  BscConf
 }
 
 type TronConf struct {
@@ -22,4 +24,9 @@ type TronConf struct {
 type EthConf struct {
 	Nodes      map[string]int             `json:","`
 	Currencies map[string]eth.EthCurrency `json:","`
+}
+
+type BscConf struct {
+	Nodes      map[string]int             `json:","`
+	Currencies map[string]bsc.BscCurrency `json:","`
 }

@@ -6,6 +6,7 @@ import (
 
 	"abao/abao"
 	"abao/internal/svc"
+	"abao/pkg/bsc"
 	"abao/pkg/common"
 	"abao/pkg/eth"
 	"abao/pkg/tron"
@@ -42,6 +43,9 @@ func (l *TransferLogic) Transfer(in *abao.TransferRequest) (*abao.TransferRespon
 	case common.AddressType_ETH:
 		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 		args = eth.NewEthTransferParameter()
+	case common.AddressType_BSC:
+		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
+		args = bsc.NewBscTransferParameter()
 	default:
 		return nil, errors.New("unsupported address type")
 	}

@@ -6,6 +6,7 @@ import (
 
 	"abao/abao"
 	"abao/internal/svc"
+	"abao/pkg/bsc"
 	"abao/pkg/common"
 	"abao/pkg/eth"
 	"abao/pkg/tron"
@@ -38,6 +39,8 @@ func (l *GetTranscationLogic) GetTranscation(in *abao.GetTranscationRequest) (*a
 		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
 	case common.Chain_ETH:
 		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+	case common.Chain_BSC:
+		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
 	default:
 		return nil, errors.New("unsupported chain")
 	}
