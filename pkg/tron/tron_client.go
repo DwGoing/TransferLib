@@ -62,13 +62,14 @@ func (Self *TronClient) GetCurrentHeight() (int64, error) {
 }
 
 // @title	查询余额
-// @param	Self	*TronClient
-// @param	address	string		地址
-// @param	args	any			参数
-// @return	_		float64		余额
-// @return	_		error		异常信息
-func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
-	parameter, ok := args.(TronGetBalanceParameter)
+// @param	Self		*TronClient
+// @param	address		string		地址
+// @param	currency	string		币种
+// @param	args		any			参数
+// @return	_			float64		余额
+// @return	_			error		异常信息
+func (Self *TronClient) GetBalance(address string, currency string, args any) (float64, error) {
+	_, ok := args.(TronGetBalanceParameter)
 	if !ok {
 		return 0, nil
 	}
@@ -76,37 +77,38 @@ func (Self *TronClient) GetBalance(address string, args any) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	currency, ok := Self.currencies[parameter.currency]
+	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
 		return 0, errors.New("unsupported currency")
 	}
-	if currency.Contract == "" {
+	var balance float64
+	if currencyInfo.Contract == "" {
 		account, err := client.GetAccount(address)
 		if err != nil {
 			return 0, err
 		}
-		balance, _ := new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(math.Pow10(currency.Decimals))).Float64()
-		return balance, nil
+		balance, _ = new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Float64()
 	} else {
-		balanceBigInt, err := client.TRC20ContractBalance(address, currency.Contract)
+		balanceBigInt, err := client.TRC20ContractBalance(address, currencyInfo.Contract)
 		if err != nil {
 			return 0, err
 		}
-		balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(currency.Decimals))).Float64()
-		return balance, nil
+		balance, _ = new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Float64()
 	}
+	return balance, nil
 }
 
 // @title	转账
 // @param	Self		*TronClient
 // @param	privateKey	*ecdsa.PrivateKey	私钥
 // @param	to			string				交易
+// @param	currency	string				币种
 // @param	value		float64				金额
 // @param	args		any					参数
 // @return	_			string				交易哈希
 // @return	_			error				异常信息
-func (Self *TronClient) Transfer(privateKey string, to string, value float64, args any) (string, error) {
-	parameter, ok := args.(TronTransferParameter)
+func (Self *TronClient) Transfer(privateKey string, to string, currency string, value float64, args any) (string, error) {
+	_, ok := args.(TronTransferParameter)
 	if !ok {
 		return "", nil
 	}
@@ -114,7 +116,7 @@ func (Self *TronClient) Transfer(privateKey string, to string, value float64, ar
 	if err != nil {
 		return "", err
 	}
-	currency, ok := Self.currencies[parameter.currency]
+	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
 		return "", errors.New("unsupported currency")
 	}
@@ -124,18 +126,18 @@ func (Self *TronClient) Transfer(privateKey string, to string, value float64, ar
 	}
 	from, err := account.GetAddress()
 	var tx *api.TransactionExtention
-	if currency.Contract == "" {
+	if currencyInfo.Contract == "" {
 		if err != nil {
 			return "", err
 		}
-		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currency.Decimals))).Int64()
+		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int64()
 		tx, err = client.Transfer(from, to, valueInt64)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currency.Decimals))).Int(new(big.Int))
-		tx, err = client.TRC20Send(from, to, currency.Contract, valueBigInt, 300000000)
+		valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int(new(big.Int))
+		tx, err = client.TRC20Send(from, to, currencyInfo.Contract, valueBigInt, 300000000)
 		if err != nil {
 			return "", err
 		}
