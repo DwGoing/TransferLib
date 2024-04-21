@@ -155,12 +155,13 @@ func (Self *TronClient) Transfer(privateKey string, to string, currency string, 
 // @return	_			*Transaction	交易信息
 // @return	_			error			异常信息
 func (Self *TronClient) GetTransaction(txHash string) (*common.Transaction, error) {
+	transaction := common.Transaction{
+		Chain: common.Chain_TRON,
+		Hash:  txHash,
+	}
 	client, err := Self.getTronRpcClient()
 	if err != nil {
 		return nil, err
-	}
-	transaction := common.Transaction{
-		Hash: txHash,
 	}
 	tx, err := client.GetTransactionInfoByID(txHash)
 	if err != nil {
