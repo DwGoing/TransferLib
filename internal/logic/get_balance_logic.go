@@ -40,12 +40,13 @@ func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalan
 	var client common.IChainClient
 	var args any
 	switch addressType {
-	case common.AddressType_TRON:
-		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-		args = tron.NewTronGetBalanceParameter()
+	case common.AddressType_BTC_LEGACY, common.AddressType_BTC_SEGWIT, common.AddressType_BTC_NATIVE_SEGWIT:
 	case common.AddressType_ETH:
 		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 		args = eth.NewEthGetBalanceParameter()
+	case common.AddressType_TRON:
+		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		args = tron.NewTronGetBalanceParameter()
 	case common.AddressType_BSC:
 		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
 		args = bsc.NewBscGetBalanceParameter()

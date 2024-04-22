@@ -35,10 +35,11 @@ func (l *GetTranscationLogic) GetTranscation(in *abao.GetTranscationRequest) (*a
 	}
 	var client common.IChainClient
 	switch chain {
-	case common.Chain_TRON:
-		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+	case common.Chain_BTC:
 	case common.Chain_ETH:
 		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+	case common.Chain_TRON:
+		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
 	case common.Chain_BSC:
 		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
 	default:
