@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"abao/abao"
-	"abao/internal/svc"
-	"abao/pkg/bsc"
-	"abao/pkg/common"
-	"abao/pkg/eth"
-	"abao/pkg/tron"
+	"transfer_lib/internal/svc"
+	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/common"
+	"transfer_lib/pkg/eth"
+	"transfer_lib/pkg/tron"
+	"transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +28,7 @@ func NewTransferLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Transfer
 	}
 }
 
-func (l *TransferLogic) Transfer(in *abao.TransferRequest) (*abao.TransferResponse, error) {
+func (l *TransferLogic) Transfer(in *transfer_lib.TransferRequest) (*transfer_lib.TransferResponse, error) {
 	addressType, err := common.ParseAddressType(in.AddressType)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (l *TransferLogic) Transfer(in *abao.TransferRequest) (*abao.TransferRespon
 		return nil, err
 	}
 
-	return &abao.TransferResponse{
+	return &transfer_lib.TransferResponse{
 		TranscationHash: txHash,
 	}, nil
 }

@@ -1,9 +1,9 @@
 package hd_wallet
 
 import (
-	"abao/pkg/common"
 	"encoding/hex"
 	"errors"
+	"transfer_lib/pkg/common"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcutil"

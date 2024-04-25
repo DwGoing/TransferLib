@@ -1,7 +1,7 @@
 package bsc
 
 import (
-	"abao/pkg/common"
+	"transfer_lib/pkg/common"
 
 	"github.com/btcsuite/btcd/btcec"
 )

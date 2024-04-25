@@ -1,9 +1,9 @@
 package hd_wallet
 
 import (
-	"abao/pkg/common"
 	"errors"
 	"fmt"
+	"transfer_lib/pkg/common"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil/hdkeychain"

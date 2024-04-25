@@ -1,9 +1,9 @@
 package config
 
 import (
-	"abao/pkg/bsc"
-	"abao/pkg/eth"
-	"abao/pkg/tron"
+	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/eth"
+	"transfer_lib/pkg/tron"
 
 	"github.com/zeromicro/go-zero/zrpc"
 )

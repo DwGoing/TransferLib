@@ -3,13 +3,13 @@ package logic
 import (
 	"context"
 
-	"abao/abao"
-	"abao/internal/svc"
-	"abao/pkg/bsc"
-	"abao/pkg/btc"
-	"abao/pkg/common"
-	"abao/pkg/eth"
-	"abao/pkg/tron"
+	"transfer_lib/internal/svc"
+	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/btc"
+	"transfer_lib/pkg/common"
+	"transfer_lib/pkg/eth"
+	"transfer_lib/pkg/tron"
+	"transfer_lib/transfer_lib"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,8 +29,8 @@ func NewGetAccountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAcc
 	}
 }
 
-func (l *GetAccountLogic) GetAccount(in *abao.GetAccountRequest) (*abao.GetAccountResponse, error) {
-	accounts := map[string]*abao.Account{}
+func (l *GetAccountLogic) GetAccount(in *transfer_lib.GetAccountRequest) (*transfer_lib.GetAccountResponse, error) {
+	accounts := map[string]*transfer_lib.Account{}
 	for _, addressTypeStr := range in.AddressTypes {
 		addressType, err := common.ParseAddressType(addressTypeStr)
 		if err != nil {
@@ -73,13 +73,13 @@ func (l *GetAccountLogic) GetAccount(in *abao.GetAccountRequest) (*abao.GetAccou
 		if err != nil {
 			continue
 		}
-		accounts[addressTypeStr] = &abao.Account{
+		accounts[addressTypeStr] = &transfer_lib.Account{
 			PrivateKey: account.GetPrivateKeyHex(),
 			Address:    address,
 		}
 	}
 
-	return &abao.GetAccountResponse{
+	return &transfer_lib.GetAccountResponse{
 		Accounts: accounts,
 	}, nil
 }

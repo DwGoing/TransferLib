@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"abao/abao"
-	"abao/internal/config"
-	"abao/internal/server"
-	"abao/internal/svc"
+	"transfer_lib/internal/config"
+	"transfer_lib/internal/server"
+	"transfer_lib/internal/svc"
+	"transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/abao.yaml", "the config file")
+var configFile = flag.String("f", "etc/transfer_lib.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -26,7 +26,7 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		abao.RegisterAbaoServer(grpcServer, server.NewAbaoServer(ctx))
+		transfer_lib.RegisterTransferLibServer(grpcServer, server.NewTransferLibServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

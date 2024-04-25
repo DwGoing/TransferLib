@@ -1,7 +1,7 @@
 Mode: dev
 Log:
   Encoding: plain
-Name: abao.rpc
+Name: transfer_lib.rpc
 ListenOn: 0.0.0.0:8080
 Timeout: 0
 Tron:

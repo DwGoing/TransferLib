@@ -1,8 +1,8 @@
 package hd_wallet
 
 import (
-	"abao/pkg/common"
 	"testing"
+	"transfer_lib/pkg/common"
 
 	ethereumCommon "github.com/ethereum/go-ethereum/common"
 )

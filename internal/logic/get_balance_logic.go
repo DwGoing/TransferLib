@@ -5,12 +5,12 @@ import (
 	"errors"
 	"sync"
 
-	"abao/abao"
-	"abao/internal/svc"
-	"abao/pkg/bsc"
-	"abao/pkg/common"
-	"abao/pkg/eth"
-	"abao/pkg/tron"
+	"transfer_lib/internal/svc"
+	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/common"
+	"transfer_lib/pkg/eth"
+	"transfer_lib/pkg/tron"
+	"transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,7 +29,7 @@ func NewGetBalanceLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetBal
 	}
 }
 
-func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalanceResponse, error) {
+func (l *GetBalanceLogic) GetBalance(in *transfer_lib.GetBalanceRequest) (*transfer_lib.GetBalanceResponse, error) {
 	addressType, err := common.ParseAddressType(in.AddressType)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (l *GetBalanceLogic) GetBalance(in *abao.GetBalanceRequest) (*abao.GetBalan
 	}
 	waitGroup.Wait()
 
-	return &abao.GetBalanceResponse{
+	return &transfer_lib.GetBalanceResponse{
 		Balances: balances,
 	}, nil
 }

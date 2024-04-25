@@ -1,14 +1,14 @@
 package bsc
 
 import (
-	"abao/pkg/common"
-	"abao/pkg/hd_wallet"
 	"context"
 	"errors"
 	"math"
 	"math/big"
 	"math/rand"
 	"time"
+	"transfer_lib/pkg/common"
+	"transfer_lib/pkg/hd_wallet"
 
 	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"

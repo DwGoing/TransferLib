@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package abao;
-option go_package="./abao";
+package transfer_lib;
+option go_package="./transfer_lib";
 
 message GetAccountRequest {
   string mnemonic = 1;
@@ -57,7 +57,7 @@ message GetTranscationResponse {
   uint64 Confirms = 8;
 }
 
-service Abao {
+service TransferLib {
   rpc GetAccount(GetAccountRequest) returns(GetAccountResponse);
   rpc GetBalance(GetBalanceRequest) returns(GetBalanceResponse);
   rpc Transfer(TransferRequest) returns(TransferResponse);

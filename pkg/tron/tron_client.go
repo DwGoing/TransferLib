@@ -1,8 +1,6 @@
 package tron
 
 import (
-	"abao/pkg/common"
-	"abao/pkg/hd_wallet"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"errors"
@@ -11,6 +9,8 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
+	"transfer_lib/pkg/common"
+	"transfer_lib/pkg/hd_wallet"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"

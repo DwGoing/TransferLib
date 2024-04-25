@@ -1,6 +1,6 @@
 package svc
 
-import "abao/internal/config"
+import "transfer_lib/internal/config"
 
 type ServiceContext struct {
 	Config config.Config

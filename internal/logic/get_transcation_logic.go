@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 
-	"abao/abao"
-	"abao/internal/svc"
-	"abao/pkg/bsc"
-	"abao/pkg/common"
-	"abao/pkg/eth"
-	"abao/pkg/tron"
+	"transfer_lib/internal/svc"
+	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/common"
+	"transfer_lib/pkg/eth"
+	"transfer_lib/pkg/tron"
+	"transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,7 +28,7 @@ func NewGetTranscationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 	}
 }
 
-func (l *GetTranscationLogic) GetTranscation(in *abao.GetTranscationRequest) (*abao.GetTranscationResponse, error) {
+func (l *GetTranscationLogic) GetTranscation(in *transfer_lib.GetTranscationRequest) (*transfer_lib.GetTranscationResponse, error) {
 	chain, err := common.ParseChain(in.Chain)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (l *GetTranscationLogic) GetTranscation(in *abao.GetTranscationRequest) (*a
 		return nil, err
 	}
 
-	return &abao.GetTranscationResponse{
+	return &transfer_lib.GetTranscationResponse{
 		Result:    transcation.Result,
 		Height:    transcation.Height,
 		Timestamp: transcation.TimeStamp,
