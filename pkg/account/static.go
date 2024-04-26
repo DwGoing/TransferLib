@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/ethereum/go-ethereum/accounts"
+	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -88,4 +89,15 @@ func GetPrivateKeyFromMnemonic(mnemonic string, password string, chainParams *ch
 		return nil, err
 	}
 	return GetPrivateKeyFromSeed(seed, chainParams, path, index)
+}
+
+/*
+@title 	私钥十六进制格式
+@param 	privateKey	*secp256k1.PrivateKey
+@param	addressType common.AddressType 		地址类型
+@return _ 			string 					十六进制私钥
+@return _ 			error 					异常信息
+*/
+func ToHex(privateKey *secp256k1.PrivateKey) (string, error) {
+	return goTornSdkCommon.Bytes2Hex(privateKey.Serialize()), nil
 }

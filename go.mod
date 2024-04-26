@@ -6,6 +6,7 @@ require (
 	github.com/ahmetb/go-linq v3.0.0+incompatible
 	github.com/btcsuite/btcd v0.24.0
 	github.com/btcsuite/btcd/btcec/v2 v2.3.3
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0
 	github.com/zeromicro/go-zero v1.6.4
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0
@@ -22,7 +23,6 @@ require (
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.0.1 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
