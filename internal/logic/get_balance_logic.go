@@ -2,11 +2,11 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"sync"
 
 	"transfer_lib/internal/svc"
 	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/chain"
 	"transfer_lib/pkg/common"
 	"transfer_lib/pkg/eth"
 	"transfer_lib/pkg/tron"
@@ -37,21 +37,20 @@ func (l *GetBalanceLogic) GetBalance(in *transfer_lib.GetBalanceRequest) (*trans
 	waitGroup := sync.WaitGroup{}
 	balances := map[string]float64{}
 	var balancesLock sync.Mutex
-	var client common.IChainClient
+	var client chain.IChainClient
 	var args any
 	switch addressType {
-	case common.AddressType_BTC_LEGACY, common.AddressType_BTC_SEGWIT, common.AddressType_BTC_NATIVE_SEGWIT:
 	case common.AddressType_ETH:
-		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+		client = eth.NewChainClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 		args = eth.NewEthGetBalanceParameter()
 	case common.AddressType_TRON:
-		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		client = tron.NewChainClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
 		args = tron.NewTronGetBalanceParameter()
 	case common.AddressType_BSC:
-		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
+		client = bsc.NewChainClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
 		args = bsc.NewBscGetBalanceParameter()
 	default:
-		return nil, errors.New("unsupported address type")
+		return nil, common.ErrUnsupportedAddressType
 	}
 	for _, currency := range in.Currencies {
 		waitGroup.Add(1)

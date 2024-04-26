@@ -2,10 +2,10 @@ package logic
 
 import (
 	"context"
-	"errors"
 
 	"transfer_lib/internal/svc"
 	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/chain"
 	"transfer_lib/pkg/common"
 	"transfer_lib/pkg/eth"
 	"transfer_lib/pkg/tron"
@@ -29,21 +29,20 @@ func NewGetTranscationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetTranscationLogic) GetTranscation(in *transfer_lib.GetTranscationRequest) (*transfer_lib.GetTranscationResponse, error) {
-	chain, err := common.ParseChain(in.Chain)
+	chainType, err := common.ParseChain(in.Chain)
 	if err != nil {
 		return nil, err
 	}
-	var client common.IChainClient
-	switch chain {
-	case common.Chain_BTC:
+	var client chain.IChainClient
+	switch chainType {
 	case common.Chain_ETH:
-		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+		client = eth.NewChainClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 	case common.Chain_TRON:
-		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+		client = tron.NewChainClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
 	case common.Chain_BSC:
-		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
+		client = bsc.NewChainClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
 	default:
-		return nil, errors.New("unsupported chain")
+		return nil, common.ErrUnsupportedChain
 	}
 	transcation, err := client.GetTransaction(in.TranscationHash)
 	if err != nil {

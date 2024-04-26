@@ -93,9 +93,9 @@ func (l *GetAccountLogic) GetAccount(in *transfer_lib.GetAccountRequest) (*trans
 				return nil, err
 			}
 		default:
-			return nil, account.ErrUnsupportedAddressType
+			return nil, common.ErrUnsupportedAddressType
 		}
-		privateKeyHex, err := account.ToHex(privateKey)
+		privateKeyHex, err := account.PrivateKeyToHex(privateKey)
 		if err != nil {
 			return nil, err
 		}

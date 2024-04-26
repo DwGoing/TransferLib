@@ -74,7 +74,7 @@ func (Self *Account) GetPrivateKey(addressType common.AddressType) (*secp256k1.P
 	case common.AddressType_BTC_TAPROOT:
 		path = "m/86'/0'/0'/0/"
 	default:
-		return nil, account.ErrUnsupportedAddressType
+		return nil, common.ErrUnsupportedAddressType
 	}
 	return account.GetPrivateKeyFromSeed(Self.account.Seed(), &chaincfg.MainNetParams, path, Self.account.Index())
 }
@@ -131,7 +131,7 @@ func (Self *Account) GetAddress(addressType common.AddressType) (string, error) 
 		}
 		address = addressTaproot.EncodeAddress()
 	default:
-		return "", account.ErrUnsupportedAddressType
+		return "", common.ErrUnsupportedAddressType
 	}
 	return address, nil
 }

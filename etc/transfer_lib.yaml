@@ -4,6 +4,16 @@ Log:
 Name: transfer_lib.rpc
 ListenOn: 0.0.0.0:8080
 Timeout: 0
+Eth:
+  Nodes:
+    https://ethereum-holesky-rpc.publicnode.com: 100
+  Currencies:
+    ETH:
+      Contract:
+      Decimals: 18
+    USDT:
+      Contract: 4555Ed1F6D9cb6CC1D52BB88C7525b17a06da0Dd
+      Decimals: 18
 Tron:
   Nodes:
     grpc.nile.trongrid.io:50051: 100
@@ -15,16 +25,6 @@ Tron:
     USDT:
       Contract: TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj
       Decimals: 6
-Eth:
-  Nodes:
-    https://ethereum-holesky-rpc.publicnode.com: 100
-  Currencies:
-    ETH:
-      Contract:
-      Decimals: 18
-    USDT:
-      Contract: 4555Ed1F6D9cb6CC1D52BB88C7525b17a06da0Dd
-      Decimals: 18
 Bsc:
   Nodes:
     https://data-seed-prebsc-2-s1.binance.org:8545: 100
@@ -33,5 +33,5 @@ Bsc:
       Contract:
       Decimals: 18
     USDT:
-      Contract: d0F0bd3B24B436B868720711FC1060A99c8Dc049
+      Contract: 337610d27c682E347C9cD60BD4b3b107C9d34dDd
       Decimals: 18

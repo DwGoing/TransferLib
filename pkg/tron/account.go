@@ -6,8 +6,6 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/ethereum/go-ethereum/crypto"
-	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
 )
 
 type Account struct {
@@ -75,9 +73,5 @@ func (Self *Account) GetAddress() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	ethAddress := crypto.PubkeyToAddress(privateKey.ToECDSA().PublicKey)
-	tronAddress := make([]byte, 0)
-	tronAddress = append(tronAddress, byte(0x41))
-	tronAddress = append(tronAddress, ethAddress.Bytes()...)
-	return goTornSdkCommon.EncodeCheck(tronAddress), nil
+	return GetAddressFromPrivateKey(privateKey.ToECDSA()), nil
 }

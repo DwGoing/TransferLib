@@ -1,8 +1,11 @@
 package account
 
 import (
+	"encoding/hex"
 	"fmt"
+	"transfer_lib/pkg/common"
 
+	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
@@ -20,7 +23,7 @@ import (
 */
 func GetSeedFromMnemonic(mnemonic string, password string) ([]byte, error) {
 	if mnemonic == "" || !bip39.IsMnemonicValid(mnemonic) {
-		return nil, ErrInvalidMnemonic
+		return nil, common.ErrInvalidMnemonic
 	}
 	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, password)
 	if err != nil {
@@ -92,12 +95,26 @@ func GetPrivateKeyFromMnemonic(mnemonic string, password string, chainParams *ch
 }
 
 /*
-@title 	私钥十六进制格式
-@param 	privateKey	*secp256k1.PrivateKey
-@param	addressType common.AddressType 		地址类型
+@title 	十六进制格式私钥
+@param 	privateKey	*secp256k1.PrivateKey	私钥
 @return _ 			string 					十六进制私钥
 @return _ 			error 					异常信息
 */
-func ToHex(privateKey *secp256k1.PrivateKey) (string, error) {
+func PrivateKeyToHex(privateKey *secp256k1.PrivateKey) (string, error) {
 	return goTornSdkCommon.Bytes2Hex(privateKey.Serialize()), nil
+}
+
+/*
+@title 	十六进制格式私钥
+@param 	privateKey	string					十六进制私钥
+@return _ 			*secp256k1.PrivateKey 	私钥
+@return _ 			error 					异常信息
+*/
+func GetPrivateKeyFromHex(privateKeyHex string) (*secp256k1.PrivateKey, error) {
+	bytes, err := hex.DecodeString(privateKeyHex)
+	if err != nil {
+		return nil, err
+	}
+	privateKey, _ := btcec.PrivKeyFromBytes(bytes)
+	return privateKey, nil
 }

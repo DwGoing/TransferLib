@@ -2,13 +2,13 @@ package bsc
 
 import (
 	"context"
-	"errors"
+	"crypto/ecdsa"
 	"math"
 	"math/big"
 	"math/rand"
 	"time"
+	"transfer_lib/pkg/chain"
 	"transfer_lib/pkg/common"
-	"transfer_lib/pkg/hd_wallet"
 
 	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -18,28 +18,68 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-type BscClient struct {
-	common.ChainClient
-	currencies map[string]BscCurrency
+type ChainClient struct {
+	chainClient chain.ChainClient
+	currencies  map[string]BscCurrency
 }
 
-// @title	创建Bsc客户端
-// @param	nodes		map[string]int			节点列表
-// @param	currencies	map[string]TronCurrency	币种列表
-// @return	_			*EthClient				Eth客户端
-func NewBscClient(nodes map[string]int, currencies map[string]BscCurrency) *BscClient {
-	return &BscClient{
-		ChainClient: *common.NewChainClient(common.Chain_TRON, nodes),
+/*
+@title	创建链客户端
+@param	nodes		map[string]int			节点列表
+@param	currencies	map[string]TronCurrency	币种列表
+@return	_			*ChainClient			链客户端
+*/
+func NewChainClient(nodes map[string]int, currencies map[string]BscCurrency) *ChainClient {
+	return &ChainClient{
+		chainClient: *chain.NewChainClient(common.Chain_TRON, nodes),
 		currencies:  currencies,
 	}
 }
 
-// @title	获取当前高度
-// @param	Self		*BscClient
-// @return	_			uint64			当前高度
-// @return	_			error			异常信息
-func (Self *BscClient) GetCurrentHeight() (uint64, error) {
-	client, err := Self.GetBscClient()
+/*
+@title	获取Rpc客户端
+@param 	Self 	*ChainClient
+@return _ 		*ethclient.Client 	Rpc客户端
+@return _ 		error 				异常信息
+*/
+func (Self *ChainClient) getRpcClient() (*ethclient.Client, error) {
+	sum := 0
+	for _, v := range Self.chainClient.Nodes() {
+		sum += v
+	}
+	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
+	var node string
+	for k, v := range Self.chainClient.Nodes() {
+		if v >= i {
+			node = k
+			break
+		}
+		i = i - v
+	}
+	client, err := ethclient.Dial(node)
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+/*
+@title 	链类型
+@param 	Self	*ChainClient
+@return _ 		common.Chain	链类型
+*/
+func (Self *ChainClient) Chain() common.Chain {
+	return Self.chainClient.Chain()
+}
+
+/*
+@title	获取当前高度
+@param	Self	*ChainClient
+@return	_		uint64			当前高度
+@return	_		error			异常信息
+*/
+func (Self *ChainClient) GetCurrentHeight() (uint64, error) {
+	client, err := Self.getRpcClient()
 	if err != nil {
 		return 0, err
 	}
@@ -50,23 +90,25 @@ func (Self *BscClient) GetCurrentHeight() (uint64, error) {
 	return height, nil
 }
 
-// @title	查询余额
-// @param	Self		*BscClient
-// @param	address		string		地址
-// @param	currency	string		币种
-// @param	args		any			参数
-// @return	_			float64		余额
-// @return	_			error		异常信息
-func (Self *BscClient) GetBalance(address string, currency string, args any) (float64, error) {
+/*
+@title	查询余额
+@param	Self		*ChainClient
+@param	address		string			地址
+@param	currency	string			币种
+@param	args		any				参数
+@return	_			float64			余额
+@return	_			error			异常信息
+*/
+func (Self *ChainClient) GetBalance(address string, currency string, args any) (float64, error) {
 	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
-		return 0, errors.New("unsupported currency")
+		return 0, common.ErrUnsupportedCurrency
 	}
 	_, ok = args.(BscGetBalanceParameter)
 	if !ok {
 		return 0, nil
 	}
-	client, err := Self.GetBscClient()
+	client, err := Self.getRpcClient()
 	if err != nil {
 		return 0, err
 	}
@@ -90,30 +132,27 @@ func (Self *BscClient) GetBalance(address string, currency string, args any) (fl
 	return balance, nil
 }
 
-// @title	转账
-// @param	Self		*BscClient
-// @param	privateKey	*ecdsa.PrivateKey	私钥
-// @param	to			string				交易
-// @param	currency	string				币种
-// @param	value		float64				金额
-// @param	args		any					参数
-// @return	_			string				交易哈希
-// @return	_			error				异常信息
-func (Self *BscClient) Transfer(privateKey string, to string, currency string, value float64, args any) (string, error) {
-	account, err := hd_wallet.NewAccountFromPrivateKeyHex(common.AddressType_ETH, privateKey)
-	if err != nil {
-		return "", err
-	}
+/*
+@title	转账
+@param	Self		*ChainClient
+@param	privateKey	*ecdsa.PrivateKey	私钥
+@param	to			string				接收方
+@param	currency	string				币种
+@param	value		float64				金额
+@param	args		any					参数
+@return	_			string				交易哈希
+@return	_			error				异常信息
+*/
+func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, currency string, value float64, args any) (string, error) {
 	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
-		return "", errors.New("unsupported currency")
+		return "", common.ErrUnsupportedCurrency
 	}
 	_, ok = args.(BscTransferParameter)
 	if !ok {
 		return "", nil
 	}
-	account.GetPrivateKey().ToECDSA()
-	client, err := Self.GetBscClient()
+	client, err := Self.getRpcClient()
 	if err != nil {
 		return "", err
 	}
@@ -122,7 +161,7 @@ func (Self *BscClient) Transfer(privateKey string, to string, currency string, v
 	if err != nil {
 		return "", err
 	}
-	nonce, err := client.PendingNonceAt(context.Background(), crypto.PubkeyToAddress(account.GetPrivateKey().ToECDSA().PublicKey))
+	nonce, err := client.PendingNonceAt(context.Background(), crypto.PubkeyToAddress(privateKey.PublicKey))
 	if err != nil {
 		return "", err
 	}
@@ -133,7 +172,7 @@ func (Self *BscClient) Transfer(privateKey string, to string, currency string, v
 	valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int(new(big.Int))
 	if currencyInfo.Contract == "" {
 		tx := types.NewTransaction(nonce, goEthereumCommon.HexToAddress(to), valueBigInt, 21000, gasPrice, nil)
-		signedTx, err = types.SignTx(tx, types.LatestSignerForChainID(chainId), account.GetPrivateKey().ToECDSA())
+		signedTx, err = types.SignTx(tx, types.LatestSignerForChainID(chainId), privateKey)
 		if err != nil {
 			return "", err
 		}
@@ -142,7 +181,7 @@ func (Self *BscClient) Transfer(privateKey string, to string, currency string, v
 		if err != nil {
 			return "", err
 		}
-		transactOpts, err := bind.NewKeyedTransactorWithChainID(account.GetPrivateKey().ToECDSA(), chainId)
+		transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, chainId)
 		if err != nil {
 			return "", err
 		}
@@ -162,17 +201,19 @@ func (Self *BscClient) Transfer(privateKey string, to string, currency string, v
 	return signedTx.Hash().Hex(), nil
 }
 
-// @title	查询交易
-// @param	Self		*BscClient
-// @param	txHash		string			交易Hash
-// @return	_			*Transaction	交易信息
-// @return	_			error			异常信息
-func (Self *BscClient) GetTransaction(txHash string) (*common.Transaction, error) {
+/*
+@title	查询交易
+@param	Self	*ChainClient
+@param	txHash	string			交易Hash
+@return	_		*Transaction	交易信息
+@return	_		error			异常信息
+*/
+func (Self *ChainClient) GetTransaction(txHash string) (*common.Transaction, error) {
 	transaction := common.Transaction{
 		Chain: common.Chain_ETH,
 		Hash:  txHash,
 	}
-	client, err := Self.GetBscClient()
+	client, err := Self.getRpcClient()
 	if err != nil {
 		return nil, err
 	}
@@ -207,8 +248,13 @@ func (Self *BscClient) GetTransaction(txHash string) (*common.Transaction, error
 		valueBigInt = tx.Value()
 	} else {
 		matchCurrency := linq.From(Self.currencies).FirstWithT(func(item linq.KeyValue) bool {
-			return goEthereumCommon.HexToAddress(item.Value.(BscCurrency).Contract) == *tx.To()
+			currency := item.Value.(BscCurrency)
+			toAddress := *tx.To()
+			return goEthereumCommon.HexToAddress(currency.Contract) == toAddress
 		})
+		if matchCurrency == nil {
+			return nil, common.ErrUnsupportedCurrency
+		}
 		currency = matchCurrency.(linq.KeyValue).Key.(string)
 		currencyInfo = matchCurrency.(linq.KeyValue).Value.(BscCurrency)
 		erc20, err := NewBep20(goEthereumCommon.HexToAddress(currencyInfo.Contract), client)
@@ -238,29 +284,4 @@ func (Self *BscClient) GetTransaction(txHash string) (*common.Transaction, error
 		transaction.Confirms = height - transaction.Height
 	}
 	return &transaction, nil
-}
-
-// @title	获取Bsc客户端
-// @param 	Self 	*BscClient
-// @return 	_ 		*ethclient.Client 	Eth客户端
-// @return 	_ 		error 				异常信息
-func (Self *BscClient) GetBscClient() (*ethclient.Client, error) {
-	sum := 0
-	for _, v := range Self.GetNodes() {
-		sum += v
-	}
-	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
-	var node string
-	for k, v := range Self.GetNodes() {
-		if v >= i {
-			node = k
-			break
-		}
-		i = i - v
-	}
-	client, err := ethclient.Dial(node)
-	if err != nil {
-		return nil, err
-	}
-	return client, nil
 }
