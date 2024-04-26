@@ -30,7 +30,7 @@ message GetBalanceResponse {
 }
 
 message TransferRequest {
-  string addressType = 1;
+  string chain = 1;
   string privateKey = 2;
   string to = 4;
   string currency = 5;
@@ -38,23 +38,23 @@ message TransferRequest {
 }
 
 message TransferResponse {
-  string TranscationHash = 1;
+  string transcationHash = 1;
 }
 
 message GetTranscationRequest {
-  string Chain = 1;
-  string TranscationHash = 2;
+  string chain = 1;
+  string transcationHash = 2;
 }
 
 message GetTranscationResponse {
-  bool Result = 1;
-  uint64 Height = 2;
-  uint64 Timestamp = 3;
-  string Currency = 4;
-	string From = 5;      
-	string To = 6;        
-	double Value = 7;    
-  uint64 Confirms = 8;
+  bool result = 1;
+  uint64 height = 2;
+  uint64 timestamp = 3;
+  string currency = 4;
+	string from = 5;      
+	string to = 6;        
+	double value = 7;    
+  uint64 confirms = 8;
 }
 
 service TransferLib {

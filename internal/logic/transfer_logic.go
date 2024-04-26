@@ -2,10 +2,11 @@ package logic
 
 import (
 	"context"
-	"errors"
 
 	"transfer_lib/internal/svc"
+	"transfer_lib/pkg/account"
 	"transfer_lib/pkg/bsc"
+	"transfer_lib/pkg/chain"
 	"transfer_lib/pkg/common"
 	"transfer_lib/pkg/eth"
 	"transfer_lib/pkg/tron"
@@ -29,28 +30,28 @@ func NewTransferLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Transfer
 }
 
 func (l *TransferLogic) Transfer(in *transfer_lib.TransferRequest) (*transfer_lib.TransferResponse, error) {
-	addressType, err := common.ParseAddressType(in.AddressType)
+	chainType, err := common.ParseChain(in.Chain)
 	if err != nil {
 		return nil, err
 	}
 	var txHash string
-	var client common.IChainClient
+	var client chain.IChainClient
 	var args any
-	switch addressType {
-	case common.AddressType_BTC_LEGACY, common.AddressType_BTC_SEGWIT, common.AddressType_BTC_NATIVE_SEGWIT:
-	case common.AddressType_ETH:
-		client = eth.NewEthClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
+	switch chainType {
+	case common.Chain_ETH:
+		client = eth.NewChainClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
 		args = eth.NewEthTransferParameter()
-	case common.AddressType_TRON:
-		client = tron.NewTronClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
+	case common.Chain_TRON:
+		client = tron.NewChainClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
 		args = tron.NewTronTransferParameter()
-	case common.AddressType_BSC:
-		client = bsc.NewBscClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
+	case common.Chain_BSC:
+		client = bsc.NewChainClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
 		args = bsc.NewBscTransferParameter()
 	default:
-		return nil, errors.New("unsupported address type")
+		return nil, common.ErrUnsupportedChain
 	}
-	txHash, err = client.Transfer(in.PrivateKey, in.To, in.Currency, in.Value, args)
+	pk, err := account.GetPrivateKeyFromHex(in.PrivateKey)
+	txHash, err = client.Transfer(pk.ToECDSA(), in.To, in.Currency, in.Value, args)
 	if err != nil {
 		return nil, err
 	}
