@@ -3,6 +3,7 @@ package common
 import "errors"
 
 var (
+	ErrInvalidIndex           = errors.New("the index is invalid")
 	ErrInvalidMnemonic        = errors.New("the mnemonic is invalid")
 	ErrUnsupportedAddressType = errors.New("the address type is unsupported")
 	ErrUnsupportedCurrency    = errors.New("the currency is unsupported")
