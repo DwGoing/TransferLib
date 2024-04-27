@@ -42,13 +42,13 @@ func (l *GetBalanceLogic) GetBalance(in *transfer_lib.GetBalanceRequest) (*trans
 	switch addressType {
 	case common.AddressType_ETH:
 		client = eth.NewChainClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
-		args = eth.NewEthGetBalanceParameter()
+		args = eth.GetBalanceParameter{}
 	case common.AddressType_TRON:
 		client = tron.NewChainClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-		args = tron.NewTronGetBalanceParameter()
+		args = tron.GetBalanceParameter{}
 	case common.AddressType_BSC:
 		client = bsc.NewChainClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
-		args = bsc.NewBscGetBalanceParameter()
+		args = bsc.GetBalanceParameter{}
 	default:
 		return nil, common.ErrUnsupportedAddressType
 	}

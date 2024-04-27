@@ -40,17 +40,20 @@ func (l *TransferLogic) Transfer(in *transfer_lib.TransferRequest) (*transfer_li
 	switch chainType {
 	case common.Chain_ETH:
 		client = eth.NewChainClient(l.svcCtx.Config.Eth.Nodes, l.svcCtx.Config.Eth.Currencies)
-		args = eth.NewEthTransferParameter()
+		args = eth.TransferParameter{}
 	case common.Chain_TRON:
 		client = tron.NewChainClient(l.svcCtx.Config.Tron.Nodes, l.svcCtx.Config.Tron.ApiKeys, l.svcCtx.Config.Tron.Currencies)
-		args = tron.NewTronTransferParameter()
+		args = tron.TransferParameter{}
 	case common.Chain_BSC:
 		client = bsc.NewChainClient(l.svcCtx.Config.Bsc.Nodes, l.svcCtx.Config.Bsc.Currencies)
-		args = bsc.NewBscTransferParameter()
+		args = bsc.TransferParameter{}
 	default:
 		return nil, common.ErrUnsupportedChain
 	}
 	pk, err := account.GetPrivateKeyFromHex(in.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
 	txHash, err = client.Transfer(pk.ToECDSA(), in.To, in.Currency, in.Value, args)
 	if err != nil {
 		return nil, err

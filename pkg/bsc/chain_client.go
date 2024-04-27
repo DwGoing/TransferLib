@@ -20,16 +20,16 @@ import (
 
 type ChainClient struct {
 	chainClient chain.ChainClient
-	currencies  map[string]BscCurrency
+	currencies  map[string]Currency
 }
 
 /*
 @title	创建链客户端
-@param	nodes		map[string]int			节点列表
-@param	currencies	map[string]TronCurrency	币种列表
-@return	_			*ChainClient			链客户端
+@param	nodes		map[string]int		节点列表
+@param	currencies	map[string]Currency	币种列表
+@return	_			*ChainClient		链客户端
 */
-func NewChainClient(nodes map[string]int, currencies map[string]BscCurrency) *ChainClient {
+func NewChainClient(nodes map[string]int, currencies map[string]Currency) *ChainClient {
 	return &ChainClient{
 		chainClient: *chain.NewChainClient(common.Chain_TRON, nodes),
 		currencies:  currencies,
@@ -104,7 +104,7 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 	if !ok {
 		return 0, common.ErrUnsupportedCurrency
 	}
-	_, ok = args.(BscGetBalanceParameter)
+	_, ok = args.(GetBalanceParameter)
 	if !ok {
 		return 0, nil
 	}
@@ -148,7 +148,7 @@ func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, curre
 	if !ok {
 		return "", common.ErrUnsupportedCurrency
 	}
-	_, ok = args.(BscTransferParameter)
+	_, ok = args.(TransferParameter)
 	if !ok {
 		return "", nil
 	}
@@ -233,7 +233,7 @@ func (Self *ChainClient) GetTransaction(txHash string) (*common.Transaction, err
 	}
 	transaction.TimeStamp = block.Time()
 	var currency string
-	var currencyInfo BscCurrency
+	var currencyInfo Currency
 	var from string
 	var to string
 	var valueBigInt *big.Int
@@ -248,7 +248,7 @@ func (Self *ChainClient) GetTransaction(txHash string) (*common.Transaction, err
 		valueBigInt = tx.Value()
 	} else {
 		matchCurrency := linq.From(Self.currencies).FirstWithT(func(item linq.KeyValue) bool {
-			currency := item.Value.(BscCurrency)
+			currency := item.Value.(Currency)
 			toAddress := *tx.To()
 			return goEthereumCommon.HexToAddress(currency.Contract) == toAddress
 		})
@@ -256,7 +256,7 @@ func (Self *ChainClient) GetTransaction(txHash string) (*common.Transaction, err
 			return nil, common.ErrUnsupportedCurrency
 		}
 		currency = matchCurrency.(linq.KeyValue).Key.(string)
-		currencyInfo = matchCurrency.(linq.KeyValue).Value.(BscCurrency)
+		currencyInfo = matchCurrency.(linq.KeyValue).Value.(Currency)
 		erc20, err := NewBep20(goEthereumCommon.HexToAddress(currencyInfo.Contract), client)
 		if err != nil {
 			return nil, err

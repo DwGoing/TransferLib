@@ -3,6 +3,8 @@ package account
 import (
 	"transfer_lib/pkg/common"
 
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 )
 
@@ -24,11 +26,18 @@ type Account struct {
 @return	_		*Account	账户
 @return	_		error		异常信息
 */
-func NewAccountFromSeed(seed []byte, index int64) *Account {
+func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
+	_, err := hdkeychain.NewMaster(seed, &chaincfg.Params{})
+	if err != nil {
+		return nil, err
+	}
+	if index < 0 {
+		return nil, common.ErrInvalidIndex
+	}
 	return &Account{
 		seed:  seed,
 		index: index,
-	}
+	}, nil
 }
 
 /*
@@ -44,7 +53,7 @@ func NewAccountFromMnemonic(mnemonic string, password string, index int64) (*Acc
 	if err != nil {
 		return nil, err
 	}
-	return NewAccountFromSeed(seed, index), nil
+	return NewAccountFromSeed(seed, index)
 }
 
 /*

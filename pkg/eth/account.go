@@ -21,11 +21,15 @@ type Account struct {
 @return	_		*Account	账户
 @return	_		error		异常信息
 */
-func NewAccountFromSeed(seed []byte, index int64) *Account {
-	return &Account{
-		account: account.NewAccountFromSeed(seed, index),
-		chain:   common.Chain_ETH,
+func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
+	account, err := account.NewAccountFromSeed(seed, index)
+	if err != nil {
+		return nil, err
 	}
+	return &Account{
+		account: account,
+		chain:   common.Chain_BSC,
+	}, nil
 }
 
 /*
@@ -41,7 +45,7 @@ func NewAccountFromMnemonic(mnemonic string, password string, index int64) (*Acc
 	if err != nil {
 		return nil, err
 	}
-	return NewAccountFromSeed(seed, index), nil
+	return NewAccountFromSeed(seed, index)
 }
 
 /*
