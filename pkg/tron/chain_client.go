@@ -24,17 +24,17 @@ import (
 type ChainClient struct {
 	chainClient chain.ChainClient
 	apiKeys     []string
-	currencies  map[string]TronCurrency
+	currencies  map[string]Currency
 }
 
 /*
 @title	创建链客户端
-@param	nodes		map[string]int			节点列表
-@param	apiKeys		[]string				ApiKey列表
-@param	currencies	map[string]TronCurrency	币种列表
-@return	_			*ChainClient			链客户端
+@param	nodes		map[string]int		节点列表
+@param	apiKeys		[]string			ApiKey列表
+@param	currencies	map[string]Currency	币种列表
+@return	_			*ChainClient		链客户端
 */
-func NewChainClient(nodes map[string]int, apiKeys []string, currencies map[string]TronCurrency) *ChainClient {
+func NewChainClient(nodes map[string]int, apiKeys []string, currencies map[string]Currency) *ChainClient {
 	return &ChainClient{
 		chainClient: *chain.NewChainClient(common.Chain_TRON, nodes),
 		apiKeys:     apiKeys,
@@ -165,7 +165,7 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 	if !ok {
 		return 0, common.ErrUnsupportedCurrency
 	}
-	_, ok = args.(TronGetBalanceParameter)
+	_, ok = args.(GetBalanceParameter)
 	if !ok {
 		return 0, nil
 	}
@@ -207,7 +207,7 @@ func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, curre
 	if !ok {
 		return "", common.ErrUnsupportedCurrency
 	}
-	_, ok = args.(TronTransferParameter)
+	_, ok = args.(TransferParameter)
 	if !ok {
 		return "", nil
 	}

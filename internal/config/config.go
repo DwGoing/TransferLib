@@ -16,17 +16,17 @@ type Config struct {
 }
 
 type TronConf struct {
-	Nodes      map[string]int               `json:","`
-	ApiKeys    []string                     `json:","`
-	Currencies map[string]tron.TronCurrency `json:","`
+	Nodes      map[string]int           `json:","`
+	ApiKeys    []string                 `json:","`
+	Currencies map[string]tron.Currency `json:","`
 }
 
 type EthConf struct {
-	Nodes      map[string]int             `json:","`
-	Currencies map[string]eth.EthCurrency `json:","`
+	Nodes      map[string]int          `json:","`
+	Currencies map[string]eth.Currency `json:","`
 }
 
 type BscConf struct {
-	Nodes      map[string]int             `json:","`
-	Currencies map[string]bsc.BscCurrency `json:","`
+	Nodes      map[string]int          `json:","`
+	Currencies map[string]bsc.Currency `json:","`
 }
