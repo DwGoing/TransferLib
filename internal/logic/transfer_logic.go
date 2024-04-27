@@ -51,6 +51,9 @@ func (l *TransferLogic) Transfer(in *transfer_lib.TransferRequest) (*transfer_li
 		return nil, common.ErrUnsupportedChain
 	}
 	pk, err := account.GetPrivateKeyFromHex(in.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
 	txHash, err = client.Transfer(pk.ToECDSA(), in.To, in.Currency, in.Value, args)
 	if err != nil {
 		return nil, err
