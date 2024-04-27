@@ -1,7 +1,17 @@
 # transfer_lib
 
 ### 使用说明
-> go get -u github.com/DwGoing/transfer_lib/pkg 
+``` shell
+# 运行服务
+git clone https://github.com/DwGoing/transfer_lib/
+cd transfer_lib
+go mod tidy
+go build -v -o ./build/transfer_lib transfer_lib.go
+./build/transfer_lib
+
+# 使用依赖
+go get -u github.com/DwGoing/transfer_lib/pkg
+```
 
 ### 功能列表
 |     **功能**     |   **接口名**   | **说明** |    **链支持**    |
