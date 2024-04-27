@@ -1,8 +1,8 @@
 package bsc
 
 import (
-	"transfer_lib/pkg/account"
-	"transfer_lib/pkg/common"
+	"github.com/DwGoing/transfer_lib/pkg/account"
+	"github.com/DwGoing/transfer_lib/pkg/common"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"

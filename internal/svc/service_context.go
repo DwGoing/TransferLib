@@ -1,6 +1,6 @@
 package svc
 
-import "transfer_lib/internal/config"
+import "github.com/DwGoing/transfer_lib/internal/config"
 
 type ServiceContext struct {
 	Config config.Config

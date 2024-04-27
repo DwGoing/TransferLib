@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"transfer_lib/internal/logic"
-	"transfer_lib/internal/svc"
-	"transfer_lib/transfer_lib"
+	"github.com/DwGoing/transfer_lib/internal/logic"
+	"github.com/DwGoing/transfer_lib/internal/svc"
+	"github.com/DwGoing/transfer_lib/transfer_lib"
 )
 
 type TransferLibServer struct {

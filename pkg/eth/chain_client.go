@@ -7,8 +7,9 @@ import (
 	"math/big"
 	"math/rand"
 	"time"
-	"transfer_lib/pkg/chain"
-	"transfer_lib/pkg/common"
+
+	"github.com/DwGoing/transfer_lib/pkg/chain"
+	"github.com/DwGoing/transfer_lib/pkg/common"
 
 	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"

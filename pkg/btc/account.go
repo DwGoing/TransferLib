@@ -1,8 +1,8 @@
 package btc
 
 import (
-	"transfer_lib/pkg/account"
-	"transfer_lib/pkg/common"
+	"github.com/DwGoing/transfer_lib/pkg/account"
+	"github.com/DwGoing/transfer_lib/pkg/common"
 
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcutil"
