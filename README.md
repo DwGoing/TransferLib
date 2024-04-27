@@ -12,7 +12,6 @@ go build -v -o ./build/transfer_lib transfer_lib.go
 # 使用依赖
 go get -u github.com/DwGoing/transfer_lib/pkg
 ```
-
 ### 配置说明
 ``` yaml
 Mode: dev
