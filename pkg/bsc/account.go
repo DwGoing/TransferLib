@@ -6,7 +6,6 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type Account struct {
@@ -78,5 +77,5 @@ func (Self *Account) GetAddress() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return crypto.PubkeyToAddress(privateKey.ToECDSA().PublicKey).Hex(), nil
+	return GetAddressFromPrivateKey(privateKey), nil
 }

@@ -54,7 +54,7 @@ func (l *TransferLogic) Transfer(in *transfer_lib.TransferRequest) (*transfer_li
 	if err != nil {
 		return nil, err
 	}
-	txHash, err = client.Transfer(pk.ToECDSA(), in.To, in.Currency, in.Value, args)
+	txHash, err = client.Transfer(pk, in.To, in.Currency, in.Value, args)
 	if err != nil {
 		return nil, err
 	}

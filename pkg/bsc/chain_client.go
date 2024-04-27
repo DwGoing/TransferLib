@@ -2,7 +2,6 @@ package bsc
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"math"
 	"math/big"
 	"math/rand"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/DwGoing/transfer_lib/pkg/chain"
 	"github.com/DwGoing/transfer_lib/pkg/common"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 
 	"github.com/ahmetb/go-linq"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -136,15 +136,15 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 /*
 @title	转账
 @param	Self		*ChainClient
-@param	privateKey	*ecdsa.PrivateKey	私钥
-@param	to			string				接收方
-@param	currency	string				币种
-@param	value		float64				金额
-@param	args		any					参数
-@return	_			string				交易哈希
-@return	_			error				异常信息
+@param	privateKey	*secp256k1.PrivateKey	私钥
+@param	to			string					接收方
+@param	currency	string					币种
+@param	value		float64					金额
+@param	args		any						参数
+@return	_			string					交易哈希
+@return	_			error					异常信息
 */
-func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, currency string, value float64, args any) (string, error) {
+func (Self *ChainClient) Transfer(privateKey *secp256k1.PrivateKey, to string, currency string, value float64, args any) (string, error) {
 	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
 		return "", common.ErrUnsupportedCurrency
@@ -162,7 +162,7 @@ func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, curre
 	if err != nil {
 		return "", err
 	}
-	nonce, err := client.PendingNonceAt(context.Background(), crypto.PubkeyToAddress(privateKey.PublicKey))
+	nonce, err := client.PendingNonceAt(context.Background(), crypto.PubkeyToAddress(privateKey.ToECDSA().PublicKey))
 	if err != nil {
 		return "", err
 	}
@@ -173,7 +173,7 @@ func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, curre
 	valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int(new(big.Int))
 	if currencyInfo.Contract == "" {
 		tx := types.NewTransaction(nonce, goEthereumCommon.HexToAddress(to), valueBigInt, 21000, gasPrice, nil)
-		signedTx, err = types.SignTx(tx, types.LatestSignerForChainID(chainId), privateKey)
+		signedTx, err = types.SignTx(tx, types.LatestSignerForChainID(chainId), privateKey.ToECDSA())
 		if err != nil {
 			return "", err
 		}
@@ -182,7 +182,7 @@ func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, curre
 		if err != nil {
 			return "", err
 		}
-		transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey, chainId)
+		transactOpts, err := bind.NewKeyedTransactorWithChainID(privateKey.ToECDSA(), chainId)
 		if err != nil {
 			return "", err
 		}

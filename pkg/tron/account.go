@@ -77,5 +77,5 @@ func (Self *Account) GetAddress() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return GetAddressFromPrivateKey(privateKey.ToECDSA()), nil
+	return GetAddressFromPrivateKey(privateKey), nil
 }

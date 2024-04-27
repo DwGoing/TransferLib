@@ -1,16 +1,15 @@
 package chain
 
 import (
-	"crypto/ecdsa"
-
 	"github.com/DwGoing/transfer_lib/pkg/common"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 )
 
 type IChainClient interface {
 	Chain() common.Chain
 	GetCurrentHeight() (uint64, error)
 	GetBalance(address string, currency string, args any) (float64, error)
-	Transfer(privateKey *ecdsa.PrivateKey, to string, currency string, value float64, args any) (string, error)
+	Transfer(privateKey *secp256k1.PrivateKey, to string, currency string, value float64, args any) (string, error)
 	GetTransaction(txHash string) (*common.Transaction, error)
 }
 

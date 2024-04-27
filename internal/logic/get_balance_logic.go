@@ -11,7 +11,6 @@ import (
 	"github.com/DwGoing/transfer_lib/pkg/eth"
 	"github.com/DwGoing/transfer_lib/pkg/tron"
 	"github.com/DwGoing/transfer_lib/transfer_lib"
-
 	"github.com/zeromicro/go-zero/core/logx"
 )
 

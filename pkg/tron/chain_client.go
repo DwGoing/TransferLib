@@ -1,7 +1,6 @@
 package tron
 
 import (
-	"crypto/ecdsa"
 	"crypto/sha256"
 	"errors"
 	"math"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/DwGoing/transfer_lib/pkg/chain"
 	"github.com/DwGoing/transfer_lib/pkg/common"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
@@ -80,12 +80,12 @@ func (Self *ChainClient) getRpcClient() (*client.GrpcClient, error) {
 @title	发送交易
 @param	Self		*ChainClient
 @param	client		*client.GrpcClient		客户端
-@param	privateKey	*ecdsa.PrivateKey		私钥
+@param	privateKey	*secp256k1.PrivateKey	私钥
 @param	tx			*core.Transaction		交易
 @return	_			*core.TransactionInfo	交易信息
 @return	_			error					异常信息
 */
-func (Self *ChainClient) sendTransaction(client *client.GrpcClient, privateKey *ecdsa.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
+func (Self *ChainClient) sendTransaction(client *client.GrpcClient, privateKey *secp256k1.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
 	rawData, err := proto.Marshal(tx.GetRawData())
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (Self *ChainClient) sendTransaction(client *client.GrpcClient, privateKey *
 	h256h.Write(rawData)
 	hash := h256h.Sum(nil)
 
-	signature, err := crypto.Sign(hash, privateKey)
+	signature, err := crypto.Sign(hash, privateKey.ToECDSA())
 	if err != nil {
 		return nil, err
 	}
@@ -194,15 +194,15 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 /*
 @title	转账
 @param	Self		*ChainClient
-@param	privateKey	*ecdsa.PrivateKey	私钥
-@param	to			string				接收方
-@param	currency	string				币种
-@param	value		float64				金额
-@param	args		any					参数
-@return	_			string				交易哈希
-@return	_			error				异常信息
+@param	privateKey	*secp256k1.PrivateKey	私钥
+@param	to			string					接收方
+@param	currency	string					币种
+@param	value		float64					金额
+@param	args		any						参数
+@return	_			string					交易哈希
+@return	_			error					异常信息
 */
-func (Self *ChainClient) Transfer(privateKey *ecdsa.PrivateKey, to string, currency string, value float64, args any) (string, error) {
+func (Self *ChainClient) Transfer(privateKey *secp256k1.PrivateKey, to string, currency string, value float64, args any) (string, error) {
 	from := GetAddressFromPrivateKey(privateKey)
 	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
