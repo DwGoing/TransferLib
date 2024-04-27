@@ -2,7 +2,8 @@ package chain
 
 import (
 	"crypto/ecdsa"
-	"transfer_lib/pkg/common"
+
+	"github.com/DwGoing/transfer_lib/pkg/common"
 )
 
 type IChainClient interface {

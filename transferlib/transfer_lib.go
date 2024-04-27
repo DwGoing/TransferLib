@@ -6,7 +6,7 @@ package transferlib
 import (
 	"context"
 
-	"transfer_lib/transfer_lib"
+	"github.com/DwGoing/transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

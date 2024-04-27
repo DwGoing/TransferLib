@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"transfer_lib/internal/config"
-	"transfer_lib/internal/server"
-	"transfer_lib/internal/svc"
-	"transfer_lib/transfer_lib"
+	"github.com/DwGoing/transfer_lib/internal/config"
+	"github.com/DwGoing/transfer_lib/internal/server"
+	"github.com/DwGoing/transfer_lib/internal/svc"
+	"github.com/DwGoing/transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

@@ -3,14 +3,14 @@ package logic
 import (
 	"context"
 
-	"transfer_lib/internal/svc"
-	"transfer_lib/pkg/account"
-	"transfer_lib/pkg/bsc"
-	"transfer_lib/pkg/btc"
-	"transfer_lib/pkg/common"
-	"transfer_lib/pkg/eth"
-	"transfer_lib/pkg/tron"
-	"transfer_lib/transfer_lib"
+	"github.com/DwGoing/transfer_lib/internal/svc"
+	"github.com/DwGoing/transfer_lib/pkg/account"
+	"github.com/DwGoing/transfer_lib/pkg/bsc"
+	"github.com/DwGoing/transfer_lib/pkg/btc"
+	"github.com/DwGoing/transfer_lib/pkg/common"
+	"github.com/DwGoing/transfer_lib/pkg/eth"
+	"github.com/DwGoing/transfer_lib/pkg/tron"
+	"github.com/DwGoing/transfer_lib/transfer_lib"
 
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/zeromicro/go-zero/core/logx"

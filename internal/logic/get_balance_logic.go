@@ -4,13 +4,13 @@ import (
 	"context"
 	"sync"
 
-	"transfer_lib/internal/svc"
-	"transfer_lib/pkg/bsc"
-	"transfer_lib/pkg/chain"
-	"transfer_lib/pkg/common"
-	"transfer_lib/pkg/eth"
-	"transfer_lib/pkg/tron"
-	"transfer_lib/transfer_lib"
+	"github.com/DwGoing/transfer_lib/internal/svc"
+	"github.com/DwGoing/transfer_lib/pkg/bsc"
+	"github.com/DwGoing/transfer_lib/pkg/chain"
+	"github.com/DwGoing/transfer_lib/pkg/common"
+	"github.com/DwGoing/transfer_lib/pkg/eth"
+	"github.com/DwGoing/transfer_lib/pkg/tron"
+	"github.com/DwGoing/transfer_lib/transfer_lib"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

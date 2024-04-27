@@ -3,7 +3,8 @@ package account
 import (
 	"encoding/hex"
 	"fmt"
-	"transfer_lib/pkg/common"
+
+	"github.com/DwGoing/transfer_lib/pkg/common"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
