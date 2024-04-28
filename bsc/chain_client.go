@@ -7,8 +7,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/DwGoing/transfer_lib/pkg/chain"
-	"github.com/DwGoing/transfer_lib/pkg/common"
+	"chain"
+	"common"
+
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 
 	"github.com/ahmetb/go-linq"

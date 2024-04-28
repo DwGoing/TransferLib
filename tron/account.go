@@ -1,8 +1,8 @@
 package tron
 
 import (
-	"github.com/DwGoing/transfer_lib/pkg/account"
-	"github.com/DwGoing/transfer_lib/pkg/common"
+	"account"
+	"common"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
