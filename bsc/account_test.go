@@ -1,41 +1,10 @@
-package account
+package bsc
 
 import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
 )
-
-func TestNewAccountFromMnemonic(t *testing.T) {
-	var tests = []struct {
-		mnemonic string
-		password string
-		index    int64
-		want     any
-	}{
-		{"", "", 0, "mnemonic is invalid"},
-		{"", "", -1, "mnemonic is invalid"},
-		{"a b c d e f g h i j k l", "", 0, "mnemonic is invalid"},
-		{"web firm spy fence blouse skill yard salute drink island thing poem", "", 0, "4eca5371e7471d5d969f73bdd3b2b25a95d7a740281ffa16d3877e37518a4c3ebb03cbcbba634a3532063a35c80bc0d5983f4f21fcfff1ddfdc3ec635e3db733"},
-		{"web firm spy fence blouse skill yard salute drink island thing poem", "", -1, "index is invalid"},
-	}
-
-	for _, test := range tests {
-		account, err := NewAccountFromMnemonic(test.mnemonic, test.password, test.index)
-		if err != nil {
-			if err.Error() != test.want {
-				t.Error(err)
-			}
-		} else {
-			if account.Index() != test.index {
-				t.Error("index error")
-			}
-			if common.Bytes2Hex(account.Seed()) != test.want {
-				t.Error("seed inconsistent")
-			}
-		}
-	}
-}
 
 func TestNewAccountFromSeed(t *testing.T) {
 	var tests = []struct {
@@ -64,10 +33,10 @@ func TestNewAccountFromSeed(t *testing.T) {
 				t.Error()
 			}
 		} else {
-			if account.Index() != test.index {
+			if account.account.Index() != test.index {
 				t.Error("index error")
 			}
-			if common.Bytes2Hex(account.Seed()) != test.want {
+			if common.Bytes2Hex(account.account.Seed()) != test.want {
 				t.Error()
 			}
 		}

@@ -7,8 +7,8 @@ import (
 	"math/rand"
 	"time"
 
-	"chain"
-	"common"
+	"github.com/DwGoing/transfer_lib/chain"
+	"github.com/DwGoing/transfer_lib/common"
 
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 
@@ -33,7 +33,7 @@ type ChainClient struct {
 */
 func NewChainClient(nodes map[string]int, currencies map[string]Currency) *ChainClient {
 	return &ChainClient{
-		chainClient: *chain.NewChainClient(common.Chain_TRON, nodes),
+		chainClient: *chain.NewChainClient(common.Chain_BSC, nodes),
 		currencies:  currencies,
 	}
 }
