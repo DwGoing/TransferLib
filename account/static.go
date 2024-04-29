@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"common"
+	"github.com/DwGoing/transfer_lib/common"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"

@@ -3,12 +3,12 @@ package common
 import "errors"
 
 var (
-	ErrInvalidIndex           = errors.New("the index is invalid")
-	ErrInvalidMnemonic        = errors.New("the mnemonic is invalid")
-	ErrUnsupportedAddressType = errors.New("the address type is unsupported")
-	ErrUnsupportedCurrency    = errors.New("the currency is unsupported")
-	ErrInvalidTransaction     = errors.New("the transaction is invalid")
+	ErrInvalidIndex           = errors.New("index is invalid")
+	ErrInvalidMnemonic        = errors.New("mnemonic is invalid")
+	ErrUnsupportedAddressType = errors.New("address type is unsupported")
+	ErrUnsupportedCurrency    = errors.New("currency is unsupported")
+	ErrInvalidTransaction     = errors.New("transaction is invalid")
 	ErrSendTransactionFailed  = errors.New("send transaction failed")
-	ErrTransactionNotFound    = errors.New("the transaction is not found")
-	ErrUnsupportedChain       = errors.New("the chain is unsupported")
+	ErrTransactionNotFound    = errors.New("transaction is not found")
+	ErrUnsupportedChain       = errors.New("chain is unsupported")
 )

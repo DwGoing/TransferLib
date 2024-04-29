@@ -1,7 +1,7 @@
 package account
 
 import (
-	"common"
+	"github.com/DwGoing/transfer_lib/common"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"

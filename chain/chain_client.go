@@ -1,7 +1,7 @@
 package chain
 
 import (
-	"common"
+	"github.com/DwGoing/transfer_lib/common"
 
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 )

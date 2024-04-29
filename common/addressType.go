@@ -14,8 +14,8 @@ const (
 	AddressType_BSC               AddressType = 7
 )
 
-func (AddressType AddressType) ToString() (string, error) {
-	switch AddressType {
+func (Self AddressType) ToString() (string, error) {
+	switch Self {
 	case AddressType_BTC_LEGACY:
 		return "BTC Legacy", nil
 	case AddressType_BTC_NESTED_SEGWIT:

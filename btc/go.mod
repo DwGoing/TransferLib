@@ -3,16 +3,6 @@ module github.com/DwGoing/transfer_lib/pkg/btc
 go 1.22.2
 
 require (
-	account v0.0.0
-	common v0.0.0
-)
-
-replace (
-	account v0.0.0 => ../account
-	common v0.0.0 => ../common
-)
-
-require (
 	github.com/btcsuite/btcd v0.24.0
 	github.com/btcsuite/btcd/btcec/v2 v2.3.3
 	github.com/btcsuite/btcd/btcutil v1.1.5
