@@ -1,4 +1,4 @@
-module github.com/DwGoing/transfer_lib/pkg/eth
+module github.com/DwGoing/transfer_lib/eth
 
 go 1.22.2
 

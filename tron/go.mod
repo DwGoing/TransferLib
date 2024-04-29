@@ -1,4 +1,4 @@
-module github.com/DwGoing/transfer_lib/pkg/tron
+module github.com/DwGoing/transfer_lib/tron
 
 go 1.22.2
 

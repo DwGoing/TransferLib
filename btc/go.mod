@@ -1,4 +1,4 @@
-module github.com/DwGoing/transfer_lib/pkg/btc
+module github.com/DwGoing/transfer_lib/btc
 
 go 1.22.2
 

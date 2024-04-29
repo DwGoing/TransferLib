@@ -1,4 +1,4 @@
-module github.com/DwGoing/transfer_lib/pkg/bsc
+module github.com/DwGoing/transfer_lib/bsc
 
 go 1.22.2
 
