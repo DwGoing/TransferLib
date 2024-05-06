@@ -1,8 +1,8 @@
 package eth
 
 import (
-	"account"
-	"common"
+	"github.com/DwGoing/transfer_lib/account"
+	"github.com/DwGoing/transfer_lib/common"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
