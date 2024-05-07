@@ -10,6 +10,7 @@ import (
 
 	"github.com/DwGoing/transfer_lib/chain"
 	"github.com/DwGoing/transfer_lib/common"
+	"github.com/ahmetb/go-linq"
 
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 
@@ -25,21 +26,20 @@ import (
 
 type ChainClient struct {
 	chainClient chain.ChainClient
-	apiKeys     []string
 	currencies  map[string]Currency
 }
 
 /*
 @title	创建链客户端
-@param	nodes		map[string]int		节点列表
-@param	apiKeys		[]string			ApiKey列表
+@param	nodes		[]Node				节点列表
 @param	currencies	map[string]Currency	币种列表
 @return	_			*ChainClient		链客户端
 */
-func NewChainClient(nodes map[string]int, apiKeys []string, currencies map[string]Currency) *ChainClient {
+func NewChainClient(nodes []Node, currencies map[string]Currency) *ChainClient {
+	standardNodes := []any{}
+	linq.From(nodes).ToSlice(&standardNodes)
 	return &ChainClient{
-		chainClient: *chain.NewChainClient(common.Chain_TRON, nodes),
-		apiKeys:     apiKeys,
+		chainClient: *chain.NewChainClient(common.Chain_TRON, standardNodes),
 		currencies:  currencies,
 	}
 }
@@ -52,20 +52,21 @@ func NewChainClient(nodes map[string]int, apiKeys []string, currencies map[strin
 */
 func (Self *ChainClient) getRpcClient() (*client.GrpcClient, error) {
 	sum := 0
-	for _, v := range Self.chainClient.Nodes() {
-		sum += v
+	for _, item := range Self.chainClient.Nodes() {
+		sum += item.(Node).Weight
 	}
 	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
-	var node string
-	for k, v := range Self.chainClient.Nodes() {
-		if v >= i {
-			node = k
+	var node Node
+	for _, item := range Self.chainClient.Nodes() {
+		n := item.(Node)
+		if n.Weight >= i {
+			node = n
 			break
 		}
-		i = i - v
+		i = i - n.Weight
 	}
-	client := client.NewGrpcClient(node)
-	apiKey := Self.apiKeys[rand.Int()%len(Self.apiKeys)]
+	client := client.NewGrpcClient(node.Host)
+	apiKey := node.ApiKeys[rand.Int()%len(node.ApiKeys)]
 	err := client.SetAPIKey(apiKey)
 	if err != nil {
 		return nil, err

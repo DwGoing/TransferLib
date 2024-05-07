@@ -3,7 +3,8 @@ package btc
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/DwGoing/transfer_lib/common"
+	goEthereumCommon "github.com/ethereum/go-ethereum/common"
 )
 
 func TestNewAccountFromSeed(t *testing.T) {
@@ -36,8 +37,42 @@ func TestNewAccountFromSeed(t *testing.T) {
 			if account.account.Index() != test.index {
 				t.Error("index error")
 			}
-			if common.Bytes2Hex(account.account.Seed()) != test.want {
+			if goEthereumCommon.Bytes2Hex(account.account.Seed()) != test.want {
 				t.Error()
+			}
+		}
+	}
+}
+
+func TestNewAccountFromMnemonicGetAddress(t *testing.T) {
+	var tests = []struct {
+		mnemonic    string
+		password    string
+		index       int64
+		addressType common.AddressType
+		want        any
+	}{
+		{"unfair enter female during swift radar sell since cross suit buddy slam", "", 0, common.AddressType_BTC_LEGACY, "12hvu9ojYzbrZhSAMjLnCtM14cfuon5hxG"},
+		{"unfair enter female during swift radar sell since cross suit buddy slam", "", 0, common.AddressType_BTC_NESTED_SEGWIT, "3KbHiAZpJ1svckinbxd5Sc4QmDv4Zromsw"},
+		{"unfair enter female during swift radar sell since cross suit buddy slam", "", 0, common.AddressType_BTC_NATIVE_SEGWIT, "bc1qnkdqwzemsravyhxgyncmsxrucquhd334lzn70e"},
+		{"unfair enter female during swift radar sell since cross suit buddy slam", "", 0, common.AddressType_BTC_TAPROOT, "bc1plqqf8e664mysftkr5m7rdnctl6ss6nc57qqm2fle49alr8rq3vgq2d6lpq"},
+	}
+
+	for _, test := range tests {
+		account, err := NewAccountFromMnemonic(test.mnemonic, test.password, test.index)
+		if err != nil {
+			if err.Error() != test.want {
+				t.Error()
+			}
+		} else {
+			address, err := account.GetAddress(test.addressType)
+			if err != nil {
+				if err.Error() != test.want {
+					t.Error()
+				}
+			}
+			if address != test.want {
+				t.Errorf("address not match, %s %s", address, test.want)
 			}
 		}
 	}

@@ -16,16 +16,16 @@ type IChainClient interface {
 
 type ChainClient struct {
 	chain common.Chain
-	nodes map[string]int
+	nodes []any
 }
 
 /*
 @title	创建链客户端
 @param	chain	common.Chain	链类型
-@param 	nodes 	map[string]int	节点
+@param 	nodes 	[]any			节点
 @return	_		*ChainClient	链客户端
 */
-func NewChainClient(chain common.Chain, nodes map[string]int) *ChainClient {
+func NewChainClient(chain common.Chain, nodes []any) *ChainClient {
 	return &ChainClient{
 		chain: chain,
 		nodes: nodes,
@@ -44,8 +44,8 @@ func (Self *ChainClient) Chain() common.Chain {
 /*
 @title 	节点
 @param 	Self	*ChainClient
-@return _ 		map[string]int	节点
+@return _ 		[]any			节点
 */
-func (Self *ChainClient) Nodes() map[string]int {
+func (Self *ChainClient) Nodes() []any {
 	return Self.nodes
 }

@@ -3,11 +3,13 @@ package bsc
 import (
 	"fmt"
 	"testing"
+
+	"github.com/DwGoing/transfer_lib/chain"
 )
 
 func TestGetCurrentHeight(t *testing.T) {
 	client := NewChainClient(
-		map[string]int{"https://data-seed-prebsc-2-s1.binance.org:8545": 100},
+		[]Node{{Node: chain.Node{Host: "https://data-seed-prebsc-2-s1.binance.org:8545", Weight: 100}}},
 		map[string]Currency{
 			"BNB": {
 				Contract: "",

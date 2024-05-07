@@ -1,4 +1,4 @@
-package eth
+package tron
 
 import (
 	"fmt"
@@ -9,15 +9,20 @@ import (
 
 func TestGetCurrentHeight(t *testing.T) {
 	client := NewChainClient(
-		[]Node{{Node: chain.Node{Host: "https://ethereum-holesky-rpc.publicnode.com", Weight: 100}}},
+		[]Node{
+			{
+				Node:    chain.Node{Host: "grpc.nile.trongrid.io:50051", Weight: 100},
+				ApiKeys: []string{"d9b77ec9-39e0-4765-98d8-2c59188344a0"},
+			},
+		},
 		map[string]Currency{
-			"ETH": {
+			"TRX": {
 				Contract: "",
-				Decimals: 18,
+				Decimals: 6,
 			},
 			"USDT": {
-				Contract: "4555Ed1F6D9cb6CC1D52BB88C7525b17a06da0Dd",
-				Decimals: 18,
+				Contract: "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj",
+				Decimals: 6,
 			},
 		},
 	)

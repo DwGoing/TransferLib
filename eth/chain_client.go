@@ -27,13 +27,15 @@ type ChainClient struct {
 
 /*
 @title	创建链客户端
-@param	nodes		map[string]int		节点列表
+@param	nodes		[]Node				节点列表
 @param	currencies	map[string]Currency	币种列表
 @return	_			*ChainClient		链客户端
 */
-func NewChainClient(nodes map[string]int, currencies map[string]Currency) *ChainClient {
+func NewChainClient(nodes []Node, currencies map[string]Currency) *ChainClient {
+	standardNodes := []any{}
+	linq.From(nodes).ToSlice(&standardNodes)
 	return &ChainClient{
-		chainClient: *chain.NewChainClient(common.Chain_TRON, nodes),
+		chainClient: *chain.NewChainClient(common.Chain_ETH, standardNodes),
 		currencies:  currencies,
 	}
 }
@@ -46,19 +48,20 @@ func NewChainClient(nodes map[string]int, currencies map[string]Currency) *Chain
 */
 func (Self *ChainClient) getRpcClient() (*ethclient.Client, error) {
 	sum := 0
-	for _, v := range Self.chainClient.Nodes() {
-		sum += v
+	for _, item := range Self.chainClient.Nodes() {
+		sum += item.(Node).Weight
 	}
 	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
-	var node string
-	for k, v := range Self.chainClient.Nodes() {
-		if v >= i {
-			node = k
+	var node Node
+	for _, item := range Self.chainClient.Nodes() {
+		n := item.(Node)
+		if n.Weight >= i {
+			node = n
 			break
 		}
-		i = i - v
+		i = i - n.Weight
 	}
-	client, err := ethclient.Dial(node)
+	client, err := ethclient.Dial(node.Host)
 	if err != nil {
 		return nil, err
 	}
