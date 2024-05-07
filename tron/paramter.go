@@ -6,9 +6,3 @@ type Node struct {
 	chain.Node
 	ApiKeys []string
 }
-
-type GetBalanceParameter struct {
-}
-
-type TransferParameter struct {
-}
