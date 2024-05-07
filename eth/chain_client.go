@@ -109,10 +109,6 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 	if !ok {
 		return 0, common.ErrUnsupportedCurrency
 	}
-	_, ok = args.(GetBalanceParameter)
-	if !ok {
-		return 0, nil
-	}
 	client, err := Self.getRpcClient()
 	if err != nil {
 		return 0, err
@@ -152,10 +148,6 @@ func (Self *ChainClient) Transfer(privateKey *secp256k1.PrivateKey, to string, c
 	currencyInfo, ok := Self.currencies[currency]
 	if !ok {
 		return "", common.ErrUnsupportedCurrency
-	}
-	_, ok = args.(TransferParameter)
-	if !ok {
-		return "", nil
 	}
 	client, err := Self.getRpcClient()
 	if err != nil {
