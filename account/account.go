@@ -15,18 +15,20 @@ type IAccount interface {
 }
 
 type Account struct {
+	chain common.Chain
 	seed  []byte
 	index int64
 }
 
 /*
 @title	创建账户
-@param	seed	[]byte		种子
-@param 	index	int64		账户索引
-@return	_		*Account	账户
-@return	_		error		异常信息
+@param	chain	common.Chain	链类型
+@param	seed	[]byte			种子
+@param 	index	int64			账户索引
+@return	_		*Account		账户
+@return	_		error			异常信息
 */
-func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
+func NewAccountFromSeed(chain common.Chain, seed []byte, index int64) (*Account, error) {
 	_, err := hdkeychain.NewMaster(seed, &chaincfg.Params{})
 	if err != nil {
 		return nil, err
@@ -35,6 +37,7 @@ func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
 		return nil, common.ErrInvalidIndex
 	}
 	return &Account{
+		chain: chain,
 		seed:  seed,
 		index: index,
 	}, nil
@@ -42,18 +45,28 @@ func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
 
 /*
 @title	创建账户
-@param 	mnemonic	string 		助记词
-@param 	password 	string 		密码
-@param 	index		int64		账户索引
-@return	_			*Account	账户
-@return	_			error		异常信息
+@param	chain		common.Chain	链类型
+@param 	mnemonic	string 			助记词
+@param 	password 	string 			密码
+@param 	index		int64			账户索引
+@return	_			*Account		账户
+@return	_			error			异常信息
 */
-func NewAccountFromMnemonic(mnemonic string, password string, index int64) (*Account, error) {
+func NewAccountFromMnemonic(chain common.Chain, mnemonic string, password string, index int64) (*Account, error) {
 	seed, err := GetSeedFromMnemonic(mnemonic, password)
 	if err != nil {
 		return nil, err
 	}
-	return NewAccountFromSeed(seed, index)
+	return NewAccountFromSeed(chain, seed, index)
+}
+
+/*
+@title 	链类型
+@param 	Self	*Account
+@return _ 		common.Chain	链类型
+*/
+func (Self *Account) Chain() common.Chain {
+	return Self.chain
 }
 
 /*
