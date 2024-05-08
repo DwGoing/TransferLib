@@ -9,8 +9,7 @@ import (
 )
 
 type Account struct {
-	account *account.Account
-	chain   common.Chain
+	account.Account
 }
 
 /*
@@ -21,13 +20,12 @@ type Account struct {
 @return	_		error		异常信息
 */
 func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
-	account, err := account.NewAccountFromSeed(seed, index)
+	account, err := account.NewAccountFromSeed(common.Chain_TRON, seed, index)
 	if err != nil {
 		return nil, err
 	}
 	return &Account{
-		account: account,
-		chain:   common.Chain_BSC,
+		Account: *account,
 	}, nil
 }
 
@@ -48,22 +46,13 @@ func NewAccountFromMnemonic(mnemonic string, password string, index int64) (*Acc
 }
 
 /*
-@title 	链类型
-@param 	Self	*Account
-@return _ 		common.Chain	链类型
-*/
-func (Self *Account) Chain() common.Chain {
-	return common.Chain_BSC
-}
-
-/*
 @title 	获取私钥
 @param 	Self	*Account
 @return _ 		*secp256k1.PrivateKey 	私钥
 @return _ 		error 					异常信息
 */
 func (Self *Account) GetPrivateKey() (*secp256k1.PrivateKey, error) {
-	return account.GetPrivateKeyFromSeed(Self.account.Seed(), &chaincfg.MainNetParams, "m/44'/195'/0'/0/", Self.account.Index())
+	return account.GetPrivateKeyFromSeed(Self.Seed(), &chaincfg.MainNetParams, "m/44'/195'/0'/0/", Self.Index())
 }
 
 /*

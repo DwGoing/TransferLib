@@ -21,8 +21,8 @@ import (
 )
 
 type ChainClient struct {
-	chainClient chain.ChainClient
-	currencies  map[string]Currency
+	chain.ChainClient
+	currencies map[string]Currency
 }
 
 /*
@@ -35,7 +35,7 @@ func NewChainClient(nodes []Node, currencies map[string]Currency) *ChainClient {
 	standardNodes := []any{}
 	linq.From(nodes).ToSlice(&standardNodes)
 	return &ChainClient{
-		chainClient: *chain.NewChainClient(common.Chain_ETH, standardNodes),
+		ChainClient: *chain.NewChainClient(common.Chain_ETH, standardNodes),
 		currencies:  currencies,
 	}
 }
@@ -48,12 +48,12 @@ func NewChainClient(nodes []Node, currencies map[string]Currency) *ChainClient {
 */
 func (Self *ChainClient) getRpcClient() (*ethclient.Client, error) {
 	sum := 0
-	for _, item := range Self.chainClient.Nodes() {
+	for _, item := range Self.Nodes() {
 		sum += item.(Node).Weight
 	}
 	i := rand.New(rand.NewSource(time.Now().UnixNano())).Intn(sum)
 	var node Node
-	for _, item := range Self.chainClient.Nodes() {
+	for _, item := range Self.Nodes() {
 		n := item.(Node)
 		if n.Weight >= i {
 			node = n
@@ -66,15 +66,6 @@ func (Self *ChainClient) getRpcClient() (*ethclient.Client, error) {
 		return nil, err
 	}
 	return client, nil
-}
-
-/*
-@title 	链类型
-@param 	Self	*ChainClient
-@return _ 		common.Chain	链类型
-*/
-func (Self *ChainClient) Chain() common.Chain {
-	return Self.chainClient.Chain()
 }
 
 /*

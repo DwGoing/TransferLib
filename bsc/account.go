@@ -10,7 +10,7 @@ import (
 )
 
 type Account struct {
-	*account.Account
+	account.Account
 }
 
 /*
@@ -26,7 +26,7 @@ func NewAccountFromSeed(seed []byte, index int64) (*Account, error) {
 		return nil, err
 	}
 	return &Account{
-		Account: account,
+		Account: *account,
 	}, nil
 }
 

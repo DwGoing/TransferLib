@@ -12,6 +12,7 @@ const (
 	AddressType_ETH               AddressType = 5
 	AddressType_TRON              AddressType = 6
 	AddressType_BSC               AddressType = 7
+	AddressType_SOL               AddressType = 8
 )
 
 func (Self AddressType) ToString() (string, error) {
@@ -30,6 +31,8 @@ func (Self AddressType) ToString() (string, error) {
 		return "TRON", nil
 	case AddressType_BSC:
 		return "BSC", nil
+	case AddressType_SOL:
+		return "SOL", nil
 	default:
 		return "", errors.New("unsupported address type")
 	}
@@ -51,6 +54,8 @@ func ParseAddressType(AddressType string) (AddressType, error) {
 		return AddressType_TRON, nil
 	case "BSC":
 		return AddressType_BSC, nil
+	case "SOL":
+		return AddressType_SOL, nil
 	default:
 		return 0, errors.New("unsupported address type")
 	}

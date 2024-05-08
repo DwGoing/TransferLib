@@ -10,6 +10,8 @@ import (
 
 type IAccount interface {
 	Chain() common.Chain
+	Seed() []byte
+	Index() int64
 	GetPrivateKey() (*secp256k1.PrivateKey, error)
 	GetAddress() (string, error)
 }

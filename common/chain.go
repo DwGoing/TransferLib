@@ -1,7 +1,5 @@
 package common
 
-import "errors"
-
 type Chain int8
 
 const (
@@ -9,6 +7,7 @@ const (
 	Chain_ETH  Chain = 2
 	Chain_TRON Chain = 3
 	Chain_BSC  Chain = 4
+	Chain_SOL  Chain = 5
 )
 
 func (chian Chain) ToString() (string, error) {
@@ -21,8 +20,10 @@ func (chian Chain) ToString() (string, error) {
 		return "TRON", nil
 	case Chain_BSC:
 		return "BSC", nil
+	case Chain_SOL:
+		return "SOL", nil
 	default:
-		return "", errors.New("unsupported chian")
+		return "", ErrUnsupportedChain
 	}
 }
 
@@ -36,7 +37,9 @@ func ParseChain(chain string) (Chain, error) {
 		return Chain_TRON, nil
 	case "BSC":
 		return Chain_BSC, nil
+	case "SOL":
+		return Chain_SOL, nil
 	default:
-		return 0, errors.New("unsupported chian")
+		return 0, ErrUnsupportedChain
 	}
 }
