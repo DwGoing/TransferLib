@@ -88,6 +88,7 @@ func (Self *ChainClient) GetCurrentHeight() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer client.Close()
 	height, err := client.BlockNumber(context.Background())
 	if err != nil {
 		return 0, err
@@ -113,6 +114,7 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 	if err != nil {
 		return 0, err
 	}
+	defer client.Close()
 	var balanceBigInt *big.Int
 	if currencyInfo.Contract == "" {
 		balanceBigInt, err = client.BalanceAt(context.Background(), goEthereumCommon.HexToAddress(address), nil)
@@ -153,6 +155,7 @@ func (Self *ChainClient) Transfer(privateKey *secp256k1.PrivateKey, to string, c
 	if err != nil {
 		return "", err
 	}
+	defer client.Close()
 	var signedTx *types.Transaction
 	chainId, err := client.ChainID(context.Background())
 	if err != nil {
@@ -214,6 +217,7 @@ func (Self *ChainClient) GetTransaction(txHash string) (*common.Transaction, err
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 	receipt, err := client.TransactionReceipt(context.Background(), goEthereumCommon.HexToHash(txHash))
 	if err != nil {
 		return nil, err

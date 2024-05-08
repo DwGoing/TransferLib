@@ -147,6 +147,7 @@ func (Self *ChainClient) GetCurrentHeight() (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer client.Conn.Close()
 	tx, err := client.GetNowBlock()
 	if err != nil {
 		return 0, err
@@ -172,6 +173,7 @@ func (Self *ChainClient) GetBalance(address string, currency string, args any) (
 	if err != nil {
 		return 0, err
 	}
+	defer client.Conn.Close()
 	var balance float64
 	if currencyInfo.Contract == "" {
 		account, err := client.GetAccount(address)
@@ -210,6 +212,7 @@ func (Self *ChainClient) Transfer(privateKey *secp256k1.PrivateKey, to string, c
 	if err != nil {
 		return "", err
 	}
+	defer client.Conn.Close()
 	var tx *api.TransactionExtention
 	if currencyInfo.Contract == "" {
 		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int64()
@@ -251,6 +254,7 @@ func (Self *ChainClient) GetTransaction(txHash string) (*common.Transaction, err
 	if err != nil {
 		return nil, err
 	}
+	defer client.Conn.Close()
 	transaction.Height = uint64(tx.BlockNumber)
 	transaction.TimeStamp = uint64(tx.GetBlockTimeStamp())
 	coreTx, err := client.GetTransactionByID(txHash)
