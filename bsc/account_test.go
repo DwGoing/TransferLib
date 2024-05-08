@@ -33,10 +33,10 @@ func TestNewAccountFromSeed(t *testing.T) {
 				t.Error()
 			}
 		} else {
-			if account.account.Index() != test.index {
+			if account.Index() != test.index {
 				t.Error("index error")
 			}
-			if common.Bytes2Hex(account.account.Seed()) != test.want {
+			if common.Bytes2Hex(account.Seed()) != test.want {
 				t.Error()
 			}
 		}
