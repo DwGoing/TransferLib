@@ -1,7 +1,7 @@
 package common
 
 type Transaction struct {
-	Chain     Chain
+	ChainType ChainType
 	Hash      string
 	Height    uint64
 	TimeStamp uint64
