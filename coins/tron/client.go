@@ -33,7 +33,7 @@ func NewClient(nodes []Node) *Client {
 	linq.From(nodes).ToSlice(&standardNodes)
 	return &Client{
 		nodes:    nodes,
-		decimals: map[string]int{"": 6},
+		decimals: map[string]int{},
 	}
 }
 
@@ -63,6 +63,31 @@ func (Self *Client) newRpcClient() (*client.GrpcClient, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+// Function getDecimals 获取小数位数
+func (Self *Client) getDecimals(token string) (int, error) {
+	if decimals, ok := Self.decimals[token]; ok {
+		return decimals, nil
+	} else {
+		var value int
+		if token == "" {
+			value = 6
+		} else {
+			client, err := Self.newRpcClient()
+			if err != nil {
+				return 0, err
+			}
+			defer client.Conn.Close()
+			decimalsBigInt, err := client.TRC20GetDecimals(token)
+			if err != nil {
+				return 0, err
+			}
+			value = int(decimalsBigInt.Int64())
+		}
+		Self.decimals[token] = value
+		return value, nil
+	}
 }
 
 // Function sendTransaction 发送交易
@@ -127,29 +152,24 @@ func (Self *Client) GetBalance(address string, token string) (float64, error) {
 		return 0, err
 	}
 	defer client.Conn.Close()
-	var balance float64
+	var balanceBigInt *big.Int
 	if token == "" {
 		account, err := client.GetAccount(address)
 		if err != nil {
 			return 0, err
 		}
-		decimals := Self.decimals[token]
-		balance, _ = new(big.Float).Quo(new(big.Float).SetInt64(account.Balance), big.NewFloat(math.Pow10(decimals))).Float64()
+		balanceBigInt = big.NewInt(account.Balance)
 	} else {
-		balanceBigInt, err := client.TRC20ContractBalance(address, token)
+		balanceBigInt, err = client.TRC20ContractBalance(address, token)
 		if err != nil {
 			return 0, err
 		}
-		_, ok := Self.decimals[token]
-		if !ok {
-			decimalsBigInt, err := client.TRC20GetDecimals(token)
-			if err != nil {
-				return 0, err
-			}
-			Self.decimals[token] = int(decimalsBigInt.Int64())
-		}
-		balance, _ = new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(Self.decimals[token]))).Float64()
 	}
+	decimals, err := Self.getDecimals(token)
+	if err != nil {
+		return 0, err
+	}
+	balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(decimals))).Float64()
 	return balance, nil
 }
 

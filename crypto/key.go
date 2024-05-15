@@ -1,10 +1,12 @@
 package crypto
 
 import (
+	"crypto/ecdsa"
 	"strconv"
 	"strings"
 
 	"github.com/DwGoing/transfer_lib/common"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"github.com/tyler-smith/go-bip32"
 	"github.com/tyler-smith/go-bip39"
 )
@@ -62,4 +64,14 @@ func NewPrivateKeyFromSeedByPath(seed []byte, path string) ([]byte, error) {
 		currentKey = newKey
 	}
 	return currentKey.Key, nil
+}
+
+// Function ToSecp256k1 获取secp256k1私钥
+func ToSecp256k1(privateKey []byte) *secp256k1.PrivateKey {
+	return secp256k1.PrivKeyFromBytes(privateKey)
+}
+
+// Function ToEcdsa 获取ecdsa私钥
+func ToEcdsa(privateKey []byte) *ecdsa.PrivateKey {
+	return ToSecp256k1(privateKey).ToECDSA()
 }

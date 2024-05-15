@@ -308,3 +308,95 @@ func TestGetBalance(t *testing.T) {
 		fmt.Printf("%s %s balance ===> %f\n", test.address, test.token, balance)
 	}
 }
+
+func TestTransfer(t *testing.T) {
+	wallet, err := NewHDWalletFromMnemonic("web firm spy fence blouse skill yard salute drink island thing poem", "")
+	if err != nil {
+		t.Errorf("recover wallet failed: %s", err.Error())
+		return
+	}
+
+	var tests = []struct {
+		chainType  common.ChainType
+		args       any
+		privateKey []byte
+		to         string
+		token      string
+		value      float64
+		want       any
+	}{
+		{
+			common.ChainType_ETH,
+			[]eth.Node{{Host: "https://1rpc.io/holesky", Weight: 100}},
+			[]byte{81, 45, 142, 172, 240, 116, 222, 161, 154, 166, 248, 153, 84, 24, 7, 107, 69, 25, 22, 109, 236, 37, 144, 212, 167, 166, 110, 28, 247, 243, 32, 187},
+			"0xbb03D2098FAa5867FA3381c9b1CB95F45477916E",
+			"",
+			0.5,
+			nil,
+		},
+	}
+
+	for _, test := range tests {
+		err := wallet.NewClient(test.chainType, test.args)
+		if err != nil {
+			if err.Error() != test.want {
+				t.Errorf("error not match ===> %s", err.Error())
+			}
+			continue
+		}
+		hash, err := wallet.Transfer(test.chainType, test.privateKey, test.to, test.token, test.value)
+		if err != nil {
+			if err.Error() != test.want {
+				t.Errorf("error not match ===> %s", err.Error())
+			}
+			continue
+		}
+		fmt.Printf("hash ===> %s\n", hash)
+	}
+}
+
+func TestGetTransaction(t *testing.T) {
+	wallet, err := NewHDWalletFromMnemonic("web firm spy fence blouse skill yard salute drink island thing poem", "")
+	if err != nil {
+		t.Errorf("recover wallet failed: %s", err.Error())
+		return
+	}
+
+	var tests = []struct {
+		chainType common.ChainType
+		args      any
+		txHash    string
+		want      any
+	}{
+		{
+			common.ChainType_ETH,
+			[]eth.Node{{Host: "https://1rpc.io/holesky", Weight: 100}},
+			"0xb2c4b35a1c9796ee6e5aebad44efbcad60d2102edb2fa554d3393b7afd125166",
+			nil,
+		},
+		{
+			common.ChainType_ETH,
+			[]eth.Node{{Host: "https://1rpc.io/holesky", Weight: 100}},
+			"0xbede7b0b4ed6ebc4ff603f87ecd7c074e7bbdc17a3c580775181881578d5fe0a",
+			nil,
+		},
+	}
+
+	for _, test := range tests {
+		err := wallet.NewClient(test.chainType, test.args)
+		if err != nil {
+			if err.Error() != test.want {
+				t.Errorf("error not match ===> %s", err.Error())
+			}
+			continue
+		}
+		tx, err := wallet.GetTransaction(test.chainType, test.txHash)
+		if err != nil {
+			if err.Error() != test.want {
+				t.Errorf("error not match ===> %s", err.Error())
+			}
+			continue
+		}
+		fmt.Printf("Tx ===> %+v\n", tx)
+	}
+}

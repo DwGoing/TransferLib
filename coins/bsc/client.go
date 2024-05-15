@@ -49,6 +49,35 @@ func (Self *Client) newRpcClient() (*ethclient.Client, error) {
 	return client, nil
 }
 
+// Function getDecimals 获取小数位数
+func (Self *Client) getDecimals(token string) (int, error) {
+	if decimals, ok := Self.decimals[token]; ok {
+		return decimals, nil
+	} else {
+		var value int
+		if token == "" {
+			value = 18
+		} else {
+			client, err := Self.newRpcClient()
+			if err != nil {
+				return 0, err
+			}
+			defer client.Close()
+			bep20, err := NewBep20(goEthereumCommon.HexToAddress(token), client)
+			if err != nil {
+				return 0, err
+			}
+			decimals, err := bep20.Decimals(nil)
+			if err != nil {
+				return 0, err
+			}
+			value = int(decimals)
+		}
+		Self.decimals[token] = value
+		return value, nil
+	}
+}
+
 // Function GetCurrentHeight 获取当前高度
 func (Self *Client) GetCurrentHeight() (uint64, error) {
 	client, err := Self.newRpcClient()
@@ -85,16 +114,12 @@ func (Self *Client) GetBalance(address string, token string) (float64, error) {
 		if err != nil {
 			return 0, err
 		}
-		_, ok := Self.decimals[token]
-		if !ok {
-			decimals, err := erc20.Decimals(nil)
-			if err != nil {
-				return 0, err
-			}
-			Self.decimals[token] = int(decimals)
-		}
 	}
-	balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(Self.decimals[token]))).Float64()
+	decimals, err := Self.getDecimals(token)
+	if err != nil {
+		return 0, err
+	}
+	balance, _ := new(big.Float).Quo(new(big.Float).SetInt(balanceBigInt), big.NewFloat(math.Pow10(decimals))).Float64()
 	return balance, nil
 }
 

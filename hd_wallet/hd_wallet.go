@@ -8,6 +8,7 @@ import (
 	"github.com/DwGoing/transfer_lib/coins/tron"
 	"github.com/DwGoing/transfer_lib/common"
 	"github.com/DwGoing/transfer_lib/crypto"
+	"github.com/DwGoing/transfer_lib/types"
 	"github.com/btcsuite/btcd/chaincfg"
 )
 
@@ -162,5 +163,53 @@ func (Self *HDWallet) GetBalance(chainType common.ChainType, address string, tok
 
 	} else {
 		return 0, common.ErrUninitializedClient
+	}
+}
+
+// Function Transfer 转账
+func (Self *HDWallet) Transfer(chainType common.ChainType, privateKey []byte, to string, token string, value float64) (string, error) {
+	if client, ok := Self.clients[chainType]; ok {
+		var hash string
+		var err error
+		switch chainType {
+		case common.ChainType_ETH:
+			if ethClient, ok := client.(*eth.Client); ok {
+				hash, err = ethClient.Transfer(privateKey, to, token, value)
+				if err != nil {
+					return "", err
+				}
+			} else {
+				return "", common.ErrUninitializedClient
+			}
+		default:
+			return "", common.ErrUnsupportedChainType
+		}
+		return hash, nil
+	} else {
+		return "", common.ErrUninitializedClient
+	}
+}
+
+// Function GetTransaction 查询交易
+func (Self *HDWallet) GetTransaction(chainType common.ChainType, txHash string) (*types.Transaction, error) {
+	if client, ok := Self.clients[chainType]; ok {
+		var tx *types.Transaction
+		var err error
+		switch chainType {
+		case common.ChainType_ETH:
+			if ethClient, ok := client.(*eth.Client); ok {
+				tx, err = ethClient.GetTransaction(txHash)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, common.ErrUninitializedClient
+			}
+		default:
+			return nil, common.ErrUnsupportedChainType
+		}
+		return tx, nil
+	} else {
+		return nil, common.ErrUninitializedClient
 	}
 }

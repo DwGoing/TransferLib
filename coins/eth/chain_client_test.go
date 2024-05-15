@@ -30,42 +30,38 @@ func TestGetBalance(t *testing.T) {
 	fmt.Printf("USDT Balance ===> %f\n", balance)
 }
 
-// func TestTransferETH(t *testing.T) {
-// 	pk, err := account.GetPrivateKeyFromHex("512d8eacf074dea19aa6f8995418076b4519166dec2590d4a7a66e1cf7f320bb")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	hash, err := client.Transfer(pk, "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd", "ETH", 0.005, nil)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	fmt.Printf("Tx Hash ===> %s\n", hash)
-// }
+func TestTransferETH(t *testing.T) {
+	hash, err := client.Transfer(
+		[]byte{81, 45, 142, 172, 240, 116, 222, 161, 154, 166, 248, 153, 84, 24, 7, 107, 69, 25, 22, 109, 236, 37, 144, 212, 167, 166, 110, 28, 247, 243, 32, 187},
+		"0x337610d27c682E347C9cD60BD4b3b107C9d34dDd", "", 0.005)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("Tx Hash ===> %s\n", hash)
+}
 
-// func TestTransferUSDT(t *testing.T) {
-// 	pk, err := account.GetPrivateKeyFromHex("512d8eacf074dea19aa6f8995418076b4519166dec2590d4a7a66e1cf7f320bb")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	hash, err := client.Transfer(pk, "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd", "USDT", 0.5, nil)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	fmt.Printf("Tx Hash ===> %s\n", hash)
-// }
+func TestTransferUSDT(t *testing.T) {
+	hash, err := client.Transfer(
+		[]byte{81, 45, 142, 172, 240, 116, 222, 161, 154, 166, 248, 153, 84, 24, 7, 107, 69, 25, 22, 109, 236, 37, 144, 212, 167, 166, 110, 28, 247, 243, 32, 187},
+		"0x337610d27c682E347C9cD60BD4b3b107C9d34dDd", "4555Ed1F6D9cb6CC1D52BB88C7525b17a06da0Dd", 0.5)
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("Tx Hash ===> %s\n", hash)
+}
 
-// func TestGetETHTransaction(t *testing.T) {
-// 	tx, err := client.GetTransaction("0xb2c4b35a1c9796ee6e5aebad44efbcad60d2102edb2fa554d3393b7afd125166")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	fmt.Printf("Tx ===> %+v\n", tx)
-// }
+func TestGetETHTransaction(t *testing.T) {
+	tx, err := client.GetTransaction("0xb2c4b35a1c9796ee6e5aebad44efbcad60d2102edb2fa554d3393b7afd125166")
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("Tx ===> %+v\n", tx)
+}
 
-// func TestGetUSDTTransaction(t *testing.T) {
-// 	tx, err := client.GetTransaction("0xbede7b0b4ed6ebc4ff603f87ecd7c074e7bbdc17a3c580775181881578d5fe0a")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	fmt.Printf("Tx ===> %+v\n", tx)
-// }
+func TestGetUSDTTransaction(t *testing.T) {
+	tx, err := client.GetTransaction("0xbede7b0b4ed6ebc4ff603f87ecd7c074e7bbdc17a3c580775181881578d5fe0a")
+	if err != nil {
+		t.Error(err)
+	}
+	fmt.Printf("Tx ===> %+v\n", tx)
+}

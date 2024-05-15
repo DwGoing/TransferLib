@@ -7,7 +7,7 @@ type Transaction struct {
 	Hash      string
 	Height    uint64
 	TimeStamp uint64
-	Currency  string
+	Token     string
 	From      string
 	To        string
 	Value     float64
