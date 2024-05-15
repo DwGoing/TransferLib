@@ -161,7 +161,7 @@ func (Self *Client) Transfer(privateKey []byte, to string, token string, value f
 			return "", err
 		}
 	} else {
-		ierc20, err := NewErc20(goEthereumCommon.HexToAddress(token), client)
+		erc20, err := NewErc20(goEthereumCommon.HexToAddress(token), client)
 		if err != nil {
 			return "", err
 		}
@@ -173,7 +173,7 @@ func (Self *Client) Transfer(privateKey []byte, to string, token string, value f
 		transactOpts.Nonce = big.NewInt(int64(nonce))
 		transactOpts.GasLimit = uint64(300000)
 		transactOpts.GasPrice = gasPrice
-		signedTx, err = ierc20.Transfer(transactOpts, goEthereumCommon.HexToAddress(to), valueBigInt)
+		signedTx, err = erc20.Transfer(transactOpts, goEthereumCommon.HexToAddress(to), valueBigInt)
 		if err != nil {
 			return "", err
 		}
