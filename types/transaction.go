@@ -1,7 +1,9 @@
-package common
+package types
+
+import "github.com/DwGoing/transfer_lib/common"
 
 type Transaction struct {
-	ChainType ChainType
+	ChainType common.ChainType
 	Hash      string
 	Height    uint64
 	TimeStamp uint64
