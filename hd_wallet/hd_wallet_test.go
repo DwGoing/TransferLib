@@ -334,6 +334,33 @@ func TestTransfer(t *testing.T) {
 			0.5,
 			nil,
 		},
+		{
+			common.ChainType_ETH,
+			[]eth.Node{{Host: "https://1rpc.io/holesky", Weight: 100}},
+			[]byte{81, 45, 142, 172, 240, 116, 222, 161, 154, 166, 248, 153, 84, 24, 7, 107, 69, 25, 22, 109, 236, 37, 144, 212, 167, 166, 110, 28, 247, 243, 32, 187},
+			"0xbb03D2098FAa5867FA3381c9b1CB95F45477916E",
+			"0x4555Ed1F6D9cb6CC1D52BB88C7525b17a06da0Dd",
+			0.5,
+			nil,
+		},
+		{
+			common.ChainType_BSC,
+			[]bsc.Node{{Host: "https://data-seed-prebsc-2-s1.binance.org:8545", Weight: 100}},
+			[]byte{81, 45, 142, 172, 240, 116, 222, 161, 154, 166, 248, 153, 84, 24, 7, 107, 69, 25, 22, 109, 236, 37, 144, 212, 167, 166, 110, 28, 247, 243, 32, 187},
+			"0xbb03D2098FAa5867FA3381c9b1CB95F45477916E",
+			"",
+			0.005,
+			nil,
+		},
+		{
+			common.ChainType_BSC,
+			[]bsc.Node{{Host: "https://data-seed-prebsc-2-s1.binance.org:8545", Weight: 100}},
+			[]byte{81, 45, 142, 172, 240, 116, 222, 161, 154, 166, 248, 153, 84, 24, 7, 107, 69, 25, 22, 109, 236, 37, 144, 212, 167, 166, 110, 28, 247, 243, 32, 187},
+			"0xbb03D2098FAa5867FA3381c9b1CB95F45477916E",
+			"337610d27c682E347C9cD60BD4b3b107C9d34dDd",
+			0.5,
+			nil,
+		},
 	}
 
 	for _, test := range tests {
@@ -378,6 +405,18 @@ func TestGetTransaction(t *testing.T) {
 			common.ChainType_ETH,
 			[]eth.Node{{Host: "https://1rpc.io/holesky", Weight: 100}},
 			"0xbede7b0b4ed6ebc4ff603f87ecd7c074e7bbdc17a3c580775181881578d5fe0a",
+			nil,
+		},
+		{
+			common.ChainType_BSC,
+			[]bsc.Node{{Host: "https://data-seed-prebsc-2-s1.binance.org:8545", Weight: 100}},
+			"0x3ab5c6df0c9c06c59c5b558c89e08ce372a903874fa6808c8eab31027df443fd",
+			nil,
+		},
+		{
+			common.ChainType_BSC,
+			[]bsc.Node{{Host: "https://data-seed-prebsc-2-s1.binance.org:8545", Weight: 100}},
+			"0xc942b78e00c25cef39e732c313648e6dec4a50dda11155296ab2f4cc5dc69ef8",
 			nil,
 		},
 	}

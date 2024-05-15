@@ -181,6 +181,15 @@ func (Self *HDWallet) Transfer(chainType common.ChainType, privateKey []byte, to
 			} else {
 				return "", common.ErrUninitializedClient
 			}
+		case common.ChainType_BSC:
+			if bscClient, ok := client.(*bsc.Client); ok {
+				hash, err = bscClient.Transfer(privateKey, to, token, value)
+				if err != nil {
+					return "", err
+				}
+			} else {
+				return "", common.ErrUninitializedClient
+			}
 		default:
 			return "", common.ErrUnsupportedChainType
 		}
@@ -199,6 +208,15 @@ func (Self *HDWallet) GetTransaction(chainType common.ChainType, txHash string) 
 		case common.ChainType_ETH:
 			if ethClient, ok := client.(*eth.Client); ok {
 				tx, err = ethClient.GetTransaction(txHash)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, common.ErrUninitializedClient
+			}
+		case common.ChainType_BSC:
+			if bscClient, ok := client.(*bsc.Client); ok {
+				tx, err = bscClient.GetTransaction(txHash)
 				if err != nil {
 					return nil, err
 				}
