@@ -1,6 +1,7 @@
 package tron
 
 import (
+	"crypto/ecdsa"
 	"crypto/sha256"
 	"errors"
 	"math"
@@ -9,13 +10,13 @@ import (
 	"time"
 
 	"github.com/DwGoing/transfer_lib/common"
+	"github.com/DwGoing/transfer_lib/types"
 	"github.com/ahmetb/go-linq"
-
-	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
 	goTornSdkCommon "github.com/fbsobreira/gotron-sdk/pkg/common"
+	"github.com/fbsobreira/gotron-sdk/pkg/proto/api"
 	"github.com/fbsobreira/gotron-sdk/pkg/proto/core"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -91,7 +92,7 @@ func (Self *Client) getDecimals(token string) (int, error) {
 }
 
 // Function sendTransaction 发送交易
-func (Self *Client) sendTransaction(client *client.GrpcClient, privateKey *secp256k1.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
+func (Self *Client) sendTransaction(client *client.GrpcClient, privateKey *ecdsa.PrivateKey, tx *core.Transaction) (*core.TransactionInfo, error) {
 	rawData, err := proto.Marshal(tx.GetRawData())
 	if err != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func (Self *Client) sendTransaction(client *client.GrpcClient, privateKey *secp2
 	h256h.Write(rawData)
 	hash := h256h.Sum(nil)
 
-	signature, err := crypto.Sign(hash, privateKey.ToECDSA())
+	signature, err := crypto.Sign(hash, privateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -173,34 +174,34 @@ func (Self *Client) GetBalance(address string, token string) (float64, error) {
 	return balance, nil
 }
 
-/*
 // Function Transfer 转账
-func (Self *Client) Transfer(privateKey *secp256k1.PrivateKey, to string, currency string, value float64, args any) (string, error) {
-	from := GetAddressFromPrivateKey(privateKey.Serialize())
-	currencyInfo, ok := Self.currencies[currency]
-	if !ok {
-		return "", common.ErrUnsupportedCurrency
-	}
+func (Self *Client) Transfer(privateKey []byte, to string, token string, value float64) (string, error) {
+	ecdsaPrivateKey := crypto.ToECDSAUnsafe(privateKey)
+	from := GetAddressFromPrivateKey(privateKey)
 	client, err := Self.newRpcClient()
 	if err != nil {
 		return "", err
 	}
 	defer client.Conn.Close()
 	var tx *api.TransactionExtention
-	if currencyInfo.Contract == "" {
-		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int64()
+	decimals, err := Self.getDecimals(token)
+	if err != nil {
+		return "", err
+	}
+	if token == "" {
+		valueInt64, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(decimals))).Int64()
 		tx, err = client.Transfer(from, to, valueInt64)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(currencyInfo.Decimals))).Int(new(big.Int))
-		tx, err = client.TRC20Send(from, to, currencyInfo.Contract, valueBigInt, 300000000)
+		valueBigInt, _ := new(big.Float).Mul(big.NewFloat(value), big.NewFloat(math.Pow10(decimals))).Int(new(big.Int))
+		tx, err = client.TRC20Send(from, to, token, valueBigInt, 300000000)
 		if err != nil {
 			return "", err
 		}
 	}
-	txInfo, err := Self.sendTransaction(client, privateKey, tx.Transaction)
+	txInfo, err := Self.sendTransaction(client, ecdsaPrivateKey, tx.Transaction)
 	if err != nil {
 		return "", err
 	}
@@ -208,8 +209,8 @@ func (Self *Client) Transfer(privateKey *secp256k1.PrivateKey, to string, curren
 }
 
 // Function GetTransaction 查询交易
-func (Self *Client) GetTransaction(txHash string) (*common.Transaction, error) {
-	transaction := common.Transaction{
+func (Self *Client) GetTransaction(txHash string) (*types.Transaction, error) {
+	transaction := types.Transaction{
 		ChainType: common.ChainType_TRON,
 		Hash:      txHash,
 	}
@@ -238,7 +239,6 @@ func (Self *Client) GetTransaction(txHash string) (*common.Transaction, error) {
 	}
 	if tx.ContractAddress == nil {
 		transaction.Result = tx.Result == core.TransactionInfo_SUCESS
-		transaction.Currency = "TRX"
 		var contract core.TransferContract
 		err = contracts[0].GetParameter().UnmarshalTo(&contract)
 		if err != nil {
@@ -246,22 +246,20 @@ func (Self *Client) GetTransaction(txHash string) (*common.Transaction, error) {
 		}
 		transaction.From = goTornSdkCommon.EncodeCheck(contract.GetOwnerAddress())
 		transaction.To = goTornSdkCommon.EncodeCheck(contract.GetToAddress())
-		transaction.Value, _ = new(big.Float).Quo(new(big.Float).SetInt64(contract.GetAmount()), big.NewFloat(1e6)).Float64()
+		decimals, err := Self.getDecimals("")
+		if err != nil {
+			return nil, err
+		}
+		transaction.Value, _ = new(big.Float).Quo(new(big.Float).SetInt64(contract.GetAmount()), big.NewFloat(math.Pow10(decimals))).Float64()
 	} else {
 		receiptResult := tx.GetReceipt().GetResult()
 		transaction.Result = receiptResult == core.Transaction_Result_SUCCESS
 		contractAddress := goTornSdkCommon.EncodeCheck(tx.ContractAddress)
-		currency := ""
-		for c, ca := range Self.currencies {
-			if ca.Contract == contractAddress {
-				currency = c
-				break
-			}
+		transaction.Token = contractAddress
+		decimals, err := Self.getDecimals(contractAddress)
+		if err != nil {
+			return nil, err
 		}
-		if currency == "" {
-			return nil, common.ErrUnsupportedAddressType
-		}
-		transaction.Currency = currency
 		var contract core.TriggerSmartContract
 		err = contracts[0].GetParameter().UnmarshalTo(&contract)
 		if err != nil {
@@ -282,7 +280,7 @@ func (Self *Client) GetTransaction(txHash string) (*common.Transaction, error) {
 		}
 		transaction.From = goTornSdkCommon.EncodeCheck(contract.GetOwnerAddress())
 		transaction.To = goTornSdkCommon.EncodeCheck(append([]byte{0x41}, topics[2][12:]...))
-		transaction.Value, _ = new(big.Float).Quo(new(big.Float).SetInt(new(big.Int).SetBytes(log.Data)), big.NewFloat(math.Pow10(Self.currencies[currency].Decimals))).Float64()
+		transaction.Value, _ = new(big.Float).Quo(new(big.Float).SetInt(new(big.Int).SetBytes(log.Data)), big.NewFloat(math.Pow10(decimals))).Float64()
 	}
 	if transaction.Result {
 		height, err := Self.GetCurrentHeight()
@@ -293,4 +291,3 @@ func (Self *Client) GetTransaction(txHash string) (*common.Transaction, error) {
 	}
 	return &transaction, nil
 }
-*/

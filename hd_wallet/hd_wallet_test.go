@@ -361,6 +361,24 @@ func TestTransfer(t *testing.T) {
 			0.5,
 			nil,
 		},
+		{
+			common.ChainType_TRON,
+			[]tron.Node{{Host: "grpc.nile.trongrid.io:50051", Weight: 100, ApiKeys: []string{"d9b77ec9-39e0-4765-98d8-2c59188344a0"}}},
+			[]byte{94, 182, 114, 244, 134, 110, 88, 242, 86, 201, 89, 20, 197, 249, 106, 74, 140, 161, 241, 23, 70, 92, 84, 64, 35, 233, 203, 11, 178, 56, 122, 101},
+			"TMxdPV49nV1LTrxKLXHMzft5oxmftWgfXD",
+			"",
+			0.005,
+			nil,
+		},
+		{
+			common.ChainType_TRON,
+			[]tron.Node{{Host: "grpc.nile.trongrid.io:50051", Weight: 100, ApiKeys: []string{"d9b77ec9-39e0-4765-98d8-2c59188344a0"}}},
+			[]byte{94, 182, 114, 244, 134, 110, 88, 242, 86, 201, 89, 20, 197, 249, 106, 74, 140, 161, 241, 23, 70, 92, 84, 64, 35, 233, 203, 11, 178, 56, 122, 101},
+			"TMxdPV49nV1LTrxKLXHMzft5oxmftWgfXD",
+			"TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj",
+			0.5,
+			nil,
+		},
 	}
 
 	for _, test := range tests {
@@ -417,6 +435,18 @@ func TestGetTransaction(t *testing.T) {
 			common.ChainType_BSC,
 			[]bsc.Node{{Host: "https://data-seed-prebsc-2-s1.binance.org:8545", Weight: 100}},
 			"0xc942b78e00c25cef39e732c313648e6dec4a50dda11155296ab2f4cc5dc69ef8",
+			nil,
+		},
+		{
+			common.ChainType_TRON,
+			[]tron.Node{{Host: "grpc.nile.trongrid.io:50051", Weight: 100, ApiKeys: []string{"d9b77ec9-39e0-4765-98d8-2c59188344a0"}}},
+			"9b94340b77fa9645b80a9c5ab769a7815a2995fde7a37c9721e1754bc5bf5c23",
+			nil,
+		},
+		{
+			common.ChainType_TRON,
+			[]tron.Node{{Host: "grpc.nile.trongrid.io:50051", Weight: 100, ApiKeys: []string{"d9b77ec9-39e0-4765-98d8-2c59188344a0"}}},
+			"b0655f29a7a55d29418690dbea7d018df90ee6bc919a40f21b7e95625fdae71e",
 			nil,
 		},
 	}
