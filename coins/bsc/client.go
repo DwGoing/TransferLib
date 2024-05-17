@@ -28,7 +28,7 @@ func NewClient(nodes []Node) *Client {
 	linq.From(nodes).ToSlice(&standardNodes)
 	return &Client{
 		nodes:    nodes,
-		decimals: map[string]int{"": 18},
+		decimals: map[string]int{},
 	}
 }
 
