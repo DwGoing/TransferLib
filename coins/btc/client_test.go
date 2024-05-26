@@ -6,13 +6,7 @@ import (
 )
 
 var client = NewClient(
-	[]Node{{Host: "go.getblock.io/c01f1669b9554b4da3c4881fd1c1d2ca", Weight: 100}},
-	map[string]Currency{
-		"BTC": {
-			Contract: "",
-			Decimals: 18,
-		},
-	},
+	[]Node{{Host: "nd-987-100-938.p2pify.com/51648a7756d7757e529d48e47431ef7c", User: "hardcore-wozniak", Password: "bony-buggy-anime-kettle-cola-lent", Weight: 100}},
 )
 
 func TestGetCurrentHeight(t *testing.T) {
@@ -24,7 +18,7 @@ func TestGetCurrentHeight(t *testing.T) {
 }
 
 func TestGetBalance(t *testing.T) {
-	balance, err := client.GetBalance("bc1pew4cpmy60z9ffafu2qe7a0xqjr2cxhclrlh6wldvt4ljgdpzr96s58d29e", "BTC", nil)
+	balance, err := client.GetBalance("1L9RCzZKvMV3W3CjoCDbBSYBKgoXJmYJxE", "")
 	if err != nil {
 		t.Error(err)
 	}

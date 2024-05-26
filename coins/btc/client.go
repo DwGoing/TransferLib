@@ -4,7 +4,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/DwGoing/transfer_lib/common"
 	"github.com/ahmetb/go-linq"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -12,17 +11,17 @@ import (
 )
 
 type Client struct {
-	nodes      []Node
-	currencies map[string]Currency
+	nodes    []Node
+	decimals map[string]int
 }
 
 // Function NewClient 创建客户端
-func NewClient(nodes []Node, currencies map[string]Currency) *Client {
+func NewClient(nodes []Node) *Client {
 	standardNodes := []any{}
 	linq.From(nodes).ToSlice(&standardNodes)
 	return &Client{
-		nodes:      nodes,
-		currencies: currencies,
+		nodes:    nodes,
+		decimals: map[string]int{},
 	}
 }
 
@@ -61,13 +60,34 @@ func (Self *Client) newRpcClient() (*rpcclient.Client, error) {
 	return client, nil
 }
 
+// Function getDecimals 获取小数位数
+func (Self *Client) getDecimals(token string) (int, error) {
+	if decimals, ok := Self.decimals[token]; ok {
+		return decimals, nil
+	} else {
+		var value int
+		if token == "" {
+			value = 18
+		} else {
+			client, err := Self.newRpcClient()
+			if err != nil {
+				return 0, err
+			}
+			defer client.Disconnect()
+			// TODO
+		}
+		Self.decimals[token] = value
+		return value, nil
+	}
+}
+
 // Function GetCurrentHeight 获取当前高度
 func (Self *Client) GetCurrentHeight() (uint64, error) {
 	client, err := Self.newRpcClient()
 	if err != nil {
 		return 0, err
 	}
-	defer client.Disconnect()
+	defer client.Shutdown()
 	height, err := client.GetBlockCount()
 	if err != nil {
 		return 0, err
@@ -76,26 +96,22 @@ func (Self *Client) GetCurrentHeight() (uint64, error) {
 }
 
 // Function GetBalance 查询余额
-func (Self *Client) GetBalance(address string, currency string, args any) (float64, error) {
-	currencyInfo, ok := Self.currencies[currency]
-	if !ok {
-		return 0, common.ErrUnsupportedCurrency
-	}
-	_ = currencyInfo
+func (Self *Client) GetBalance(address string, token string) (float64, error) {
 	client, err := Self.newRpcClient()
 	if err != nil {
 		return 0, err
 	}
-	defer client.Disconnect()
+	defer client.Shutdown()
 	addr, err := btcutil.DecodeAddress(address, &chaincfg.MainNetParams)
 	if err != nil {
 		return 0, err
 	}
-	account, err := client.GetAccount(addr)
-	if err != nil {
-		return 0, err
-	}
-	a, err := client.GetBalance(account)
+	_ = addr
+	// account, err := client.GetAccount(addr)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	a, err := client.ListUnspent()
 	_ = a
 	// var balanceBigInt *big.Int
 	// if currencyInfo.Contract == "" {

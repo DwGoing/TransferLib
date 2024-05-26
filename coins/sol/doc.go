@@ -1,2 +1,2 @@
-// Package Solana
+// Package Solana Module
 package sol
